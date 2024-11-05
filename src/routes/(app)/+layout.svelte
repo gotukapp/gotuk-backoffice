@@ -14,7 +14,7 @@
     }
 </script>
 <div class="flex flex-col h-dvh">
-<Navbar>
+<Navbar class="bg-gray-200">
     {#await data.getAuthUser()}
         <div></div>
     {:then user}
@@ -42,7 +42,8 @@
         <NavLi href="/contact">Contact</NavLi>
     </NavUl>
 </Navbar>
-<Sidebar {activeUrl} class="grow">
+    <div class="flex h-full">
+<Sidebar {activeUrl} >
     <SidebarWrapper class="h-full">
         <SidebarGroup>
             <SidebarItem label="Dashboard">
@@ -83,6 +84,9 @@
             </SidebarItem>
         </SidebarGroup>
     </SidebarWrapper>
+
 </Sidebar>
+        {@render children()}
+    </div>
 </div>
-{@render children()}
+
