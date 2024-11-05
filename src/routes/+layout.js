@@ -9,7 +9,7 @@ export async function load({ url }) {
     }
 
     return {
-        getAuthUser: getAuthUser,
+        getAuthUser,
         url: url.pathname
     };
 }
