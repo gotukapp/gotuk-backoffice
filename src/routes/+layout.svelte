@@ -8,6 +8,8 @@
         const loggedIn = !!user && user?.emailVerified;
         if (!loggedIn) {
             goto('/login');
+        } else {
+            goto('/main');
         }
     });
 

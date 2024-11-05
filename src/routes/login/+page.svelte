@@ -2,23 +2,16 @@
 import { Button, Checkbox, Label, Input } from "flowbite-svelte";
 import {signInWithEmailAndPassword} from 'firebase/auth'
 import {auth} from '$lib'
+import {goto} from "$app/navigation";
 
 let email = $state('')
 let password = $state('')
 
 const handlePasswordLogin = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    const body = new URLSearchParams();
-
-    for (const pair of formData.entries()) {
-        body.append(pair[0], pair[1]);
-    }
     signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            // ...
+        .then(() => {
+            goto('/main')
         })
         .catch((error) => {
             alert(error.code + ' ' +error.message)
@@ -37,7 +30,7 @@ const handlePasswordLogin = async (event) => {
                 <h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Entrar</h3>
                 <Label class="space-y-2">
                     <span>Your email</span>
-                    <Input type="text" bind:value="{email}" name="email" placeholder="name@company.com" required />
+                    <Input type="email" bind:value="{email}" name="email" placeholder="name@gotuk.com" required />
                 </Label>
                 <Label class="space-y-2">
                     <span>Your password</span>
