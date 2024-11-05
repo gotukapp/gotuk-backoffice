@@ -26,13 +26,13 @@ const handlePasswordLogin = async (event) => {
 }
 
 </script>
-<div class="flex flex-col items-center justify-center mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
+<div class="flex items-center justify-center md:h-screen pt:mt-0 dark:bg-gray-900">
 <Section name="login" >
     <Register href="/">
         <svelte:fragment slot="top">
             <!--img class="w-8 h-8 mr-2" src="/images/logo.svg" alt="logo" /-->
         </svelte:fragment>
-        <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+        <div class="p-6 space-y-4 md:space-y-6 sm:p-8 w-96">
             <form class="flex flex-col space-y-6" onsubmit={handlePasswordLogin}>
                 <h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Entrar</h3>
                 <Label class="space-y-2">

@@ -13,5 +13,6 @@
 
 
 </script>
-
-{@render children()}
+<div class="bg-gray-100">
+    {@render children()}
+</div>
