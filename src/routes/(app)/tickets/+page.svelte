@@ -32,6 +32,7 @@
     <TableHead>
         <TableHeadCell>Date</TableHeadCell>
         <TableHeadCell>Client</TableHeadCell>
+        <TableHeadCell>Status</TableHeadCell>
         <TableHeadCell>Category</TableHeadCell>
         <TableHeadCell>Reason</TableHeadCell>
         <TableHeadCell>Subject</TableHeadCell>
@@ -46,6 +47,7 @@
             <TableBodyRow>
                 <TableBodyCell>{ticket.creationDate.toDate().toLocaleString()}</TableBodyCell>
                 <TableBodyCell>{ticket.user ? ticket.user.name : 'N/A'}</TableBodyCell>
+                <TableBodyCell>{ticket.status}</TableBodyCell>
                 <TableBodyCell>{ticket.category}</TableBodyCell>
                 <TableBodyCell>{ticket.reason}</TableBodyCell>
                 <TableBodyCell>{ticket.subject}</TableBodyCell>
