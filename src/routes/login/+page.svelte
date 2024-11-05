@@ -1,5 +1,30 @@
 <script lang="ts">import { Section, Register } from "flowbite-svelte-blocks";
 import { Button, Checkbox, Label, Input } from "flowbite-svelte";
+import {signInWithEmailAndPassword} from 'firebase/auth'
+import {auth} from '$lib'
+
+let email = $state('')
+let password = $state('')
+
+const handlePasswordLogin = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const body = new URLSearchParams();
+
+    for (const pair of formData.entries()) {
+        body.append(pair[0], pair[1]);
+    }
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            // ...
+        })
+        .catch((error) => {
+            alert(error.code + ' ' +error.message)
+        });
+}
+
 </script>
 <div class="flex flex-col items-center justify-center mx-auto md:h-screen pt:mt-0 dark:bg-gray-900">
 <Section name="login" >
@@ -8,15 +33,15 @@ import { Button, Checkbox, Label, Input } from "flowbite-svelte";
             <!--img class="w-8 h-8 mr-2" src="/images/logo.svg" alt="logo" /-->
         </svelte:fragment>
         <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <form class="flex flex-col space-y-6" action="/">
+            <form class="flex flex-col space-y-6" onsubmit={handlePasswordLogin}>
                 <h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Entrar</h3>
                 <Label class="space-y-2">
                     <span>Your email</span>
-                    <Input type="email" name="email" placeholder="name@company.com" required />
+                    <Input type="email" bind:value="{email}" name="email" placeholder="name@company.com" required />
                 </Label>
                 <Label class="space-y-2">
                     <span>Your password</span>
-                    <Input type="password" name="password" placeholder="•••••" required />
+                    <Input type="password" bind:value="{password}" name="password" placeholder="•••••" required />
                 </Label>
                 <div class="flex items-start">
                     <Checkbox>Remember me</Checkbox>
