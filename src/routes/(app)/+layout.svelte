@@ -1,11 +1,17 @@
 <script>
     import { Navbar, NavBrand, NavLi, NavUl, NavHamburger, Avatar, Dropdown, DropdownItem, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
     import { page } from '$app/stores';
+    import { auth } from '$lib'
     import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper } from 'flowbite-svelte';
     import { ChartPieSolid, GridSolid, MailBoxSolid, UserSolid, ArrowRightToBracketOutline, EditOutline } from 'flowbite-svelte-icons';
+    import {goto} from "$app/navigation";
     let spanClass = 'flex-1 ms-3 whitespace-nowrap';
     let {data, children} = $props()
     let activeUrl = $page.url.pathname;
+    async function signOut() {
+        await auth.signOut()
+        goto('/login')
+    }
 </script>
 <div class="flex flex-col h-dvh">
 <Navbar>
@@ -25,10 +31,9 @@
             <span class="block text-sm">{user.displayName}</span>
             <span class="block truncate text-sm font-medium">{user.email}</span>
         </DropdownHeader>
-        <DropdownItem>Dashboard</DropdownItem>
         <DropdownItem>Settings</DropdownItem>
         <DropdownDivider />
-        <DropdownItem>Sign out</DropdownItem>
+        <DropdownItem on:click={signOut}>Sign out</DropdownItem>
     </Dropdown>
     {/await}
     <NavUl>
