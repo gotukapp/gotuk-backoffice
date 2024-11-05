@@ -8,9 +8,7 @@
         const user = await data.getAuthUser();
         const loggedIn = !!user && user?.emailVerified;
         if (!loggedIn && auth.currentUser === null) {
-            goto('/login');
-        } else {
-            goto('/main');
+            await goto('/login');
         }
     });
 </script>
