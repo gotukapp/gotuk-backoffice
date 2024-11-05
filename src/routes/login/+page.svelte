@@ -37,7 +37,7 @@ const handlePasswordLogin = async (event) => {
                 <h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Entrar</h3>
                 <Label class="space-y-2">
                     <span>Your email</span>
-                    <Input type="email" bind:value="{email}" name="email" placeholder="name@company.com" required />
+                    <Input type="text" bind:value="{email}" name="email" placeholder="name@company.com" required />
                 </Label>
                 <Label class="space-y-2">
                     <span>Your password</span>
