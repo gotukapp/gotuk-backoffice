@@ -16,16 +16,20 @@
     </caption>
     <TableHead>
         <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Email</TableHeadCell>
+        <TableHeadCell>Nome</TableHeadCell>
         <TableHeadCell>
-            <span class="sr-only">Edit</span>
+            <span class="sr-only">Ver</span>
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
         {#each users as user}
             <TableBodyRow>
                 <TableBodyCell>{user.name}</TableBodyCell>
+                <TableBodyCell>{user.email}</TableBodyCell>
+                <TableBodyCell>{user.phone}</TableBodyCell>
                 <TableBodyCell>
-                    <a href="/edit/{user.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
+                    <a href="clients/{user.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                 </TableBodyCell>
             </TableBodyRow>
         {/each}

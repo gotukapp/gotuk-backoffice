@@ -3,10 +3,10 @@
     import { collection, getDocs } from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
-    let trips = $state([])
+    let tours = $state([])
     onMount(async () => {
         const querySnapshot = await getDocs(collection(db, "tours"));
-        trips = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        tours = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     });
 </script>
 <div class="w-full">
@@ -15,24 +15,17 @@
         Tours
     </caption>
     <TableHead>
-        <TableHeadCell>Product name</TableHeadCell>
-        <TableHeadCell>Color</TableHeadCell>
-        <TableHeadCell>Category</TableHeadCell>
-        <TableHeadCell>Price</TableHeadCell>
+        <TableHeadCell>Name</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Edit</span>
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-        {#each trips as trip}
+        {#each tours as tour}
             <TableBodyRow>
-                <TableBodyCell>{trip.reservationId}</TableBodyCell>
-                <TableBodyCell>{trip.status}</TableBodyCell>
-                <TableBodyCell>{trip.date}</TableBodyCell>
-                <TableBodyCell>{trip.persons}</TableBodyCell>
-                <TableBodyCell>{trip.price}</TableBodyCell>
+                <TableBodyCell>{tour.name}</TableBodyCell>
                 <TableBodyCell>
-                    <a href="/edit/{trips.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Edit</a>
+                    <a href="/tours/{tour.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                 </TableBodyCell>
             </TableBodyRow>
         {/each}

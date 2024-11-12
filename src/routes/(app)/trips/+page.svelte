@@ -1,11 +1,15 @@
 <script>
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import {collection, getDoc, getDocs} from "firebase/firestore";
+    import {collection, getDoc, getDocs, query, orderBy} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     let trips = $state([])
     onMount(async () => {
-        const querySnapshot = await getDocs(collection(db, "trips"));
+        const q = query(
+            collection(db, "trips"),
+            orderBy("creationDate", "desc")
+        );
+        const querySnapshot = await getDocs(q);
         trips = await Promise.all(
             querySnapshot.docs.map(async (postDoc) => {
                 const postData = postDoc.data();
@@ -28,6 +32,14 @@
             })
         );
     });
+
+    function statusColor(status) {
+        return status === 'pending' ? 'text-gray-500'
+            : (status === 'booked' ? 'text-yellow-500'
+                : (status === 'started' ? 'text-green-500'
+                    : (status === 'canceled' ? 'text-red-500'
+                        : (status === 'finished' ? 'text-blue-500' : 'text-black-500'))))
+    }
 </script>
 <div class="w-full">
 <Table >
@@ -41,7 +53,7 @@
         <TableHeadCell>Status</TableHeadCell>
         <TableHeadCell>Date</TableHeadCell>
         <TableHeadCell>
-            <span class="sr-only">Edit</span>
+            <span class="sr-only">Ver</span>
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
@@ -50,13 +62,18 @@
                 <TableBodyCell>{trip.reservationId}</TableBodyCell>
                 <TableBodyCell>{trip.client ? trip.client.name : 'N/A'}</TableBodyCell>
                 <TableBodyCell>{trip.guide ? trip.guide.name : 'N/A'}</TableBodyCell>
-                <TableBodyCell>{trip.status}</TableBodyCell>
+                <TableBodyCell class="{statusColor(trip.status)}">{trip.status.toUpperCase()}</TableBodyCell>
                 <TableBodyCell>{trip.date.toDate().toLocaleString()}</TableBodyCell>
                 <TableBodyCell>
-                    <a href="/{trips.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
+                    <a href="/trips/{trip.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                 </TableBodyCell>
             </TableBodyRow>
         {/each}
     </TableBody>
 </Table>
 </div>
+<style>
+    .canceled {
+        color: #FF5733 !important;
+    }
+</style>

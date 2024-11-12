@@ -57,15 +57,7 @@
                     <ChartPieSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Tickets" href="/tickets" active={activeUrl === '/tickets'}  {spanClass}>
-                <svelte:fragment slot="icon">
-                    <ReceiptSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-                </svelte:fragment>
-                <svelte:fragment slot="subtext">
-                    <span class="inline-flex justify-center items-center p-3 ms-3 w-3 h-3 text-sm font-medium text-primary-600 bg-primary-200 rounded-full dark:bg-primary-900 dark:text-primary-200"> 3 </span>
-                </svelte:fragment>
-            </SidebarItem>
-            <SidebarItem label="Trips" href="/trips" active={activeUrl === '/trips'}>
+            <SidebarItem label="Trips" href="/trips" active={activeUrl === '/'}>
                 <svelte:fragment slot="icon">
                     <TruckSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>

@@ -11,7 +11,7 @@ const handlePasswordLogin = async (event) => {
     event.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-            goto('/')
+            goto('/trips')
         })
         .catch((error) => {
             alert(error.code + ' ' +error.message)
