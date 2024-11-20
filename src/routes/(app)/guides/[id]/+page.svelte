@@ -3,7 +3,7 @@
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
-    import {collection, doc, getDoc, orderBy, query, limit, getDocs} from "firebase/firestore";
+    import {collection, doc, getDoc, orderBy, query, limit, getDocs, updateDoc} from "firebase/firestore";
     import { page } from "$app/stores";
 
     export let data; // Opcional, se estiver usando carregamento no server
@@ -19,6 +19,24 @@
     let insuranceWorkAccidentExpirationDate = "";
     let insurancePersonalAccidentExpirationDate = "";
     let vehicleInsuranceExpirationDate = "";
+
+    async function approve(fieldName) {
+        const documentsRef = collection(doc(db, "users", $page.params.id), "documents");
+        const q = query(documentsRef, orderBy("submitDate", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const docRef = querySnapshot.docs[0].ref; // Use .ref to get the reference of the document
+
+            // Update the specified field
+            await updateDoc(docRef, {
+                [fieldName]: "approved"
+            });
+            console.log(`Field "${fieldName}" updated to "approved".`);
+        } else {
+            console.log("No documents found to approve.");
+        }
+    }
 
     onMount(async () => {
         try {
@@ -127,9 +145,11 @@
                         <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
                         <Input id="name" bind:value={drivingLicenseExpirationDate} readonly/>
                     </div>
+                    <Button pill color="light" on:click={() => approve("identificationDocuments")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Comprovativo de Actividade</span>
+                    <Button pill color="light" on:click={() => approve("activity")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Licença RNAAT</span>
@@ -137,9 +157,11 @@
                         <Label for="input-group-1" class="block mb-2">Nº Registo</Label>
                         <Input id="name" bind:value={documents.licenseRNAATNumber} readonly/>
                     </div>
+                    <Button pill color="light" on:click={() => approve("licenseRNAAT")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Formação</span>
+                    <Button pill color="light" on:click={() => approve("training")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Apólice de Seguro de Responsabilidade Civil</span>
@@ -155,6 +177,7 @@
                         <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
                         <Input id="name" bind:value={insuranceExpirationDate} readonly/>
                     </div>
+                    <Button pill color="light" on:click={() => approve("civilLiabilityInsurancePolicy")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Apólice de seguro de Acidentes de trabalho</span>
@@ -170,6 +193,7 @@
                         <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
                         <Input id="name" bind:value={insuranceWorkAccidentExpirationDate} readonly/>
                     </div>
+                    <Button pill color="light" on:click={() => approve("workAccidentInsurancePolicy")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Apólice de Seguro de Acidentes Pessoais</span>
@@ -185,6 +209,7 @@
                         <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
                         <Input id="name" bind:value={insurancePersonalAccidentExpirationDate} readonly/>
                     </div>
+                    <Button pill color="light" on:click={() => approve("personalAccidentInsurancePolicy")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Dados do Veículo</span>
@@ -212,6 +237,7 @@
                         <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
                         <Input id="name" bind:value={vehicleInsuranceExpirationDate} readonly/>
                     </div>
+                    <Button pill color="light" on:click={() => approve("vehicleData")}>Aprovar</Button>
                 </AccordionItem>
             </Accordion>
         </Card>
