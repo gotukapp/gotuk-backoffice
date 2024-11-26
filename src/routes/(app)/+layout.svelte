@@ -25,7 +25,7 @@
         <div></div>
     {:then user}
     <NavBrand href="/">
-        <img src="" class="me-3 h-6 sm:h-9" alt="Logo" />
+        <img src="/applogo.png" class="me-3 h-6 sm:h-9" alt="Logo" />
         <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">GoTuk</span>
     </NavBrand>
     <div class="flex items-center md:order-2">
