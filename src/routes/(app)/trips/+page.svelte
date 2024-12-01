@@ -1,10 +1,13 @@
 <script>
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    import {Input, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
     import {collection, getDoc, getDocs, query, orderBy} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
 
     let items = $state([]);
+    let searchQuery = $state('');
+    let order = '';
+
     onMount(async () => {
         const q = query(
             collection(db, "trips"),
@@ -33,14 +36,42 @@
             })
         );
         result.forEach(i => items.push(i))
+
     });
 
-    function filterTrips(item, searchTerm) {
-        console.log(searchTerm)
-        if (!searchTerm) {
-            return true
+    function filterTrips(item) {
+        if (!searchQuery) {
+            return true; // Sem busca, exibe todos os itens
         }
-        return item.reservationId.toLowerCase().includes(searchTerm.toLowerCase())
+        return item.reservationId.toLowerCase().includes(searchQuery.toLowerCase())
+            || item.client.name.toLowerCase().includes(searchQuery.toLowerCase())
+            || item.guide?.name.toLowerCase().includes(searchQuery.toLowerCase())
+            || item.status.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+
+    function sortTrips(field) {
+        const direction = order === 'asc' ? 1 : -1;
+
+        items.sort((a, b) => {
+            const valueA = getNestedValue(a, field);
+            const valueB = getNestedValue(b, field);
+
+            if (typeof valueA === 'string' && typeof valueB === 'string') {
+                return direction * valueA.localeCompare(valueB);
+            } else if (typeof valueA === 'number' && typeof valueB === 'number') {
+                return direction * (valueA - valueB);
+            } else if (valueA && valueB) {
+                return direction * (valueA > valueB ? 1 : -1);
+            }
+            return direction * (valueA ? 1 : -1);
+        });
+
+        // Toggle the order
+        order = order === 'asc' ? 'desc' : 'asc';
+    }
+
+    function getNestedValue(obj, path) {
+        return path.split('.').reduce((acc, key) => acc && acc[key], obj);
     }
 
     function statusColor(status) {
@@ -52,31 +83,41 @@
     }
 </script>
 <div class="w-full">
-<Table {items} placeholder="Search by maker name" hoverable={true} filter={filterTrips}>
+<Input
+        type="text"
+        bind:value={searchQuery}
+        placeholder="Search"
+        style="margin-top: 20px; margin-bottom: 20px"
+/>
+<Table placeholder="Search by maker name" hoverable={true}>
     <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
         Trips
     </caption>
     <TableHead>
         <TableHeadCell>Reservation Id</TableHeadCell>
-        <TableHeadCell sort={(a, b) => a.client.name.localeCompare(b.client.name)}>Client</TableHeadCell>
-        <TableHeadCell sort={(a, b) => a.guide && b.guide ? a.guide.name.localeCompare(b.guide.name) : (a.guide ? 1 : -1)}>Guide</TableHeadCell>
-        <TableHeadCell sort={(a, b) => a.status.localeCompare(b.status)}>Status</TableHeadCell>
-        <TableHeadCell sort={(a, b) => a.date.toDate().toLocaleString().localeCompare(b.date.toDate().toLocaleString())}>Date</TableHeadCell>
+        <TableHeadCell on:click={() => sortTrips('client.name')}>Client</TableHeadCell>
+        <TableHeadCell on:click={() => sortTrips('guide.name')}>Guide</TableHeadCell>
+        <TableHeadCell on:click={() => sortTrips('status')}>Status</TableHeadCell>
+        <TableHeadCell on:click={() => sortTrips('date')}>Creation Date</TableHeadCell>
+        <TableHeadCell on:click={() => sortTrips('date')}>Date</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Ver</span>
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-            <TableBodyRow slot="row" let:item>
+        {#each items.filter(filterTrips) as item}
+            <TableBodyRow>
                 <TableBodyCell>{item.reservationId}</TableBodyCell>
                 <TableBodyCell>{item.client.name}</TableBodyCell>
                 <TableBodyCell>{item.guide ? item.guide.name : 'N/A'}</TableBodyCell>
                 <TableBodyCell class="{statusColor(item.status)}">{item.status.toUpperCase()}</TableBodyCell>
+                <TableBodyCell>{item.creationDate.toDate().toLocaleString()}</TableBodyCell>
                 <TableBodyCell>{item.date.toDate().toLocaleString()}</TableBodyCell>
                 <TableBodyCell>
                     <a href="/trips/{item.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                 </TableBodyCell>
             </TableBodyRow>
+        {/each}
     </TableBody>
 </Table>
 </div>

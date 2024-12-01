@@ -8,12 +8,18 @@
         UserSolid,
         ArrowRightToBracketOutline,
         EditOutline,
-        ProfileCardSolid, ReceiptSolid, TruckSolid, LandmarkSolid
+        ProfileCardSolid, TruckSolid, LandmarkSolid
     } from 'flowbite-svelte-icons';
     import {goto} from "$app/navigation";
+    import {onMount} from "svelte";
     let spanClass = 'flex-1 ms-3 whitespace-nowrap';
     let {data, children} = $props()
-    let activeUrl = $page.url.pathname;
+    let activeUrl = $state('');
+
+    onMount(async () => {
+      activeUrl = $page.url.pathname;
+    })
+
     async function signOut() {
         await auth.signOut()
         goto('/login')
@@ -57,22 +63,22 @@
                     <ChartPieSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Trips" href="/trips" active={activeUrl === '/'}>
+            <SidebarItem label="Trips" href="/trips" on:click={() => activeUrl = '/trips'} active={activeUrl === '/trips'}>
                 <svelte:fragment slot="icon">
                     <TruckSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Guides" href="/guides" active={activeUrl === '/guides'}>
+            <SidebarItem label="Guides" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
                 <svelte:fragment slot="icon">
                     <ProfileCardSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Clients" href="/clients" active={activeUrl === '/clients'}>
+            <SidebarItem label="Clients" href="/clients" on:click={() => activeUrl = '/clients'} active={activeUrl === '/clients'}>
                 <svelte:fragment slot="icon">
                     <UserSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
-            <SidebarItem label="Tours" href="/tours" active={activeUrl === '/tours'}>
+            <SidebarItem label="Tours" href="/tours" on:click={() => activeUrl = '/tours'} active={activeUrl === '/tours'}>
                 <svelte:fragment slot="icon">
                     <LandmarkSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
