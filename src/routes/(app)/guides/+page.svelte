@@ -1,11 +1,13 @@
 <script>
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import { collection, getDocs } from "firebase/firestore";
+    import {collection, getDocs, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     let users = $state([])
     onMount(async () => {
-        const querySnapshot = await getDocs(collection(db, "users"));
+        let userQuery = query(collection(db, "users"), where("guideMode", "==", true));
+        // Executa a consulta
+        const querySnapshot = await getDocs(userQuery);
         users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     });
 </script>
@@ -17,7 +19,9 @@
     <TableHead>
         <TableHeadCell>Name</TableHeadCell>
         <TableHeadCell>Email</TableHeadCell>
-        <TableHeadCell>Nome</TableHeadCell>
+        <TableHeadCell>Phone</TableHeadCell>
+        <TableHeadCell>Account Status</TableHeadCell>
+        <TableHeadCell>Rating</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Ver</span>
         </TableHeadCell>
@@ -28,6 +32,8 @@
                 <TableBodyCell>{user.name}</TableBodyCell>
                 <TableBodyCell>{user.email}</TableBodyCell>
                 <TableBodyCell>{user.phone}</TableBodyCell>
+                <TableBodyCell>{user.accountValidated ? "Valid" : "Blocked"}</TableBodyCell>
+                <TableBodyCell>{user.rating}</TableBodyCell>
                 <TableBodyCell>
                     <a href="/guides/{user.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                 </TableBodyCell>

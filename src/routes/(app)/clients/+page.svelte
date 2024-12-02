@@ -1,11 +1,12 @@
 <script>
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import { collection, getDocs } from "firebase/firestore";
+    import {collection, getDocs, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     let users = $state([])
     onMount(async () => {
-        const querySnapshot = await getDocs(collection(db, "users"));
+        let userQuery = query(collection(db, "users"), where("clientMode", "==", true));
+        const querySnapshot = await getDocs(userQuery);
         users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     });
 </script>

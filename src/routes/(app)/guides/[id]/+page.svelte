@@ -1,13 +1,14 @@
 <script>
-    import {Card, Spinner, Button, Label, Input, Accordion, AccordionItem} from 'flowbite-svelte';
-    import { ArrowLeftOutline } from 'flowbite-svelte-icons';
+    import {Card, Spinner, Button, Label, Input, Accordion, AccordionItem, Alert} from 'flowbite-svelte';
+    import { ArrowLeftOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
     import {collection, doc, getDoc, orderBy, query, limit, getDocs, updateDoc} from "firebase/firestore";
     import { page } from "$app/stores";
+    import { slide } from "svelte/transition";
 
-    export let data; // Opcional, se estiver usando carregamento no server
-
+    let showAlert = false;
+    let alertMessage = '';
     let guide = null;
     let documents = null;
     let loading = true;
@@ -29,13 +30,22 @@
             const docRef = querySnapshot.docs[0].ref; // Use .ref to get the reference of the document
 
             // Update the specified field
-            await updateDoc(docRef, {
-                [fieldName]: "approved"
-            });
+            await updateDoc(docRef, { [fieldName]: "approved" });
             console.log(`Field "${fieldName}" updated to "approved".`);
         } else {
             console.log("No documents found to approve.");
         }
+    }
+
+    async function changeAccountStatus(currentState) {
+        const documentRef = doc(db, "users", $page.params.id)
+        await updateDoc(documentRef, { "accountValidated": !currentState })
+        guide.accountValidated = !currentState
+        alertMessage = guide.accountValidated ?  "Account successfully validated" : "Account successfully blocked"
+        showAlert = true
+        setTimeout(() => {
+            showAlert = false;
+        }, 2000);
     }
 
     onMount(async () => {
@@ -104,10 +114,19 @@
     <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
 
     {#if loading}
-        <p style="margin-top: 20px"><Spinner/> Loading Trip...</p>
+        <p style="margin-top: 20px"><Spinner/> Loading Guide...</p>
     {:else if error}
         <p>{error}</p>
     {:else}
+        {#if showAlert}
+            <Alert color="green" dismissable transition={slide} style="margin-top: 10px">
+                <svelte:fragment slot="icon">
+                    <CheckCircleSolid class="w-5 h-5" />
+                    <span class="sr-only">Check icon</span>
+                </svelte:fragment>
+                <span class="font-medium">{alertMessage}</span>
+            </Alert>
+        {/if}
         <Card size="lg" style="margin-top: 20px">
             <div>
                 <div class="mb-6">
@@ -121,6 +140,11 @@
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Phone</Label>
                     <Input id="name" bind:value={guide.phone} readonly/>
+                </div>
+                <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Account Status</Label>
+                    <Input id="name" value={guide.accountValidated ? "Valid" : "Blocked"} readonly/>
+                    <Button pill color="light" style="margin-top: 10px" on:click={() => changeAccountStatus(guide.accountValidated)}>{guide.accountValidated ?  "Block Account" : "Validate Account"}</Button>
                 </div>
             </div>
         </Card>
