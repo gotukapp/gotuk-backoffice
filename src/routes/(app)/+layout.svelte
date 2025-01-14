@@ -49,8 +49,9 @@
     </Dropdown>
     {/await}
     <NavUl>
-        <NavLi href="/" active={true}>Home</NavLi>
-        <NavLi href="/about">About</NavLi>
+        <NavLi href="/trips" active={true}>Home</NavLi>
+        <NavLi href="/FAQs">FAQs</NavLi>
+        <NavLi href="https://gotuk.freshdesk.com/" target="_blank">Tickets</NavLi>
         <NavLi href="/contact">Contact</NavLi>
     </NavUl>
 </Navbar>
