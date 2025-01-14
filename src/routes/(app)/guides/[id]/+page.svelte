@@ -1,5 +1,17 @@
 <script>
-    import {Card, Spinner, Button, Label, Input, Accordion, AccordionItem, Alert} from 'flowbite-svelte';
+    import {
+        Card,
+        Spinner,
+        Button,
+        Label,
+        Input,
+        Accordion,
+        AccordionItem,
+        Alert,
+        Modal,
+        Badge,
+        Rating
+    } from 'flowbite-svelte';
     import { ArrowLeftOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
@@ -14,6 +26,7 @@
     let loading = true;
     let error = null;
 
+    let validateAccountConfirmation = false;
     let identificationNumberExpirationDate = "";
     let drivingLicenseExpirationDate = "";
     let insuranceExpirationDate = "";
@@ -127,8 +140,9 @@
                 <span class="font-medium">{alertMessage}</span>
             </Alert>
         {/if}
-        <Card size="lg" style="margin-top: 20px">
-            <div>
+        <Card size="xl" style="margin-top: 20px">
+            <Badge border color="{guide.accountValidated ? 'green' :'red'}">{guide.accountValidated ? "Valid" : "Blocked"}</Badge>
+            <div style="margin-top: 20px">
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Name</Label>
                     <Input id="name" bind:value={guide.name} readonly/>
@@ -142,13 +156,26 @@
                     <Input id="name" bind:value={guide.phone} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Account Status</Label>
-                    <Input id="name" value={guide.accountValidated ? "Valid" : "Blocked"} readonly/>
-                    <Button pill color="light" style="margin-top: 10px" on:click={() => changeAccountStatus(guide.accountValidated)}>{guide.accountValidated ?  "Block Account" : "Validate Account"}</Button>
+                    <Label for="input-group-1" class="block mb-2">Rating</Label>
+                    <Rating id="example-3" total={5} rating={guide.rating}>
+                        <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">{guide.rating} out of 5
+                        </p>
+                    </Rating>
+                    <a href="/" class="text-sm font-medium text-gray-900 underline hover:no-underline dark:text-white"> 73 reviews </a>
+                </div>
+                <div class="mb-6">
+                    <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{guide.accountValidated ? "Block Account" : "Validate Account"}</Button>
+                    <Modal title="{guide.accountValidated ? 'Block Account' : 'Validate Account'}" bind:open={validateAccountConfirmation} autoclose>
+                        <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to {guide.accountValidated ? "block" : "validate"} this account.</p>
+                        <svelte:fragment slot="footer">
+                            <Button on:click={() => changeAccountStatus(guide.accountValidated)}>Yes</Button>
+                            <Button color="alternative">No</Button>
+                        </svelte:fragment>
+                    </Modal>
                 </div>
             </div>
         </Card>
-        <Card size="lg" style="margin-top: 20px">
+        <Card size="xl" style="margin-top: 20px">
             <p><strong>Submit Date:</strong> {new Date(documents.submitDate.seconds * 1000).toLocaleString()}</p>
             <Accordion style="margin-top: 20px; margin-bottom: 20px">
                 <AccordionItem>
@@ -265,7 +292,6 @@
                 </AccordionItem>
             </Accordion>
         </Card>
-
     {/if}
 </div>
 <style>

@@ -143,7 +143,7 @@
     {:else}
         <Card size="xl" style="margin-top: 20px">
             <Badge border color="{statusColor}">{tripStatus}</Badge>
-            <div style="padding-top: 10px">
+            <div style="padding-top: 20px">
                 <div class="row">
                     <div style="float: left; width: 55%">
                         <div class="row">
