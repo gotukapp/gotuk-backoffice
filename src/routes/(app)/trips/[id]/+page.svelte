@@ -9,17 +9,19 @@
         Timeline,
         TimelineItem,
         Rating,
-        Textarea
+        Textarea, Modal
     } from 'flowbite-svelte';
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
-    import {collection, doc, getDoc} from "firebase/firestore";
+    import {collection, doc, getDoc, updateDoc, serverTimestamp, onSnapshot} from "firebase/firestore";
     import { page } from "$app/stores";
     import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';// Para acessar o ID da URL
 
     export let data; // Opcional, se estiver usando carregamento no server
 
+    let cancelConfirmation = false;
+    let tripId = null;
     let tripDoc = null;
     let guideReviewDoc = null;
     let tourReviewDoc = null;
@@ -41,76 +43,91 @@
     let tourId = '';
     let tripStatus = '';
     let statusColor = 'gray';
+    let unsubscribe;
 
     onMount(async () => {
         try {
-            const id = $page.params.id; // Pegando o ID da rota
-            const docRef = doc(db, "trips", id); // Substitua "sua_colecao" pelo nome da sua coleção
-            const docSnap = await getDoc(docRef);
+            tripId = $page.params.id;
+            const docRef = doc(db, "trips", tripId);
 
-            if (docSnap.exists()) {
-                tripDoc = docSnap.data();
+            unsubscribe = onSnapshot(docRef, async (docSnap) => {
+                try {
+                    if (docSnap.exists()) {
+                        tripDoc = docSnap.data();
 
-                if (tripDoc.tourId) {
-                    const tourSnap = await getDoc(tripDoc.tourId);
-                    if (tourSnap.exists()) {
-                        tour = tourSnap.data();
-                        tourId = tourSnap.id;
+                        if (tripDoc.tourId) {
+                            const tourSnap = await getDoc(tripDoc.tourId);
+                            if (tourSnap.exists()) {
+                                tour = tourSnap.data();
+                                tourId = tourSnap.id;
+                            }
+                        }
+
+                        if (tripDoc.clientRef) {
+                            const clientSnap = await getDoc(tripDoc.clientRef);
+                            if (clientSnap.exists()) {
+                                client = clientSnap.data();
+                                clientId = clientSnap.id;
+                            }
+                        }
+
+                        if (tripDoc.guideRef) {
+                            const guideSnap = await getDoc(tripDoc.guideRef);
+                            if (guideSnap.exists()) {
+                                guide = guideSnap.data();
+                                guideName = guide.name
+                                guideId = guideSnap.id;
+                            }
+                        }
+
+                        if (tripDoc.rateSubmitted) {
+                            const tourReviewsCollectionRef = collection(tripDoc.tourId, "reviews");
+                            const tourReviewSnap = await getDoc(doc(tourReviewsCollectionRef, docSnap.id));
+                            if (tourReviewSnap.exists()) {
+                                tourReviewDoc = tourReviewSnap.data();
+                            }
+                            const guideReviewsCollectionRef = collection(tripDoc.guideRef, "reviews");
+                            const guideReviewSnap = await getDoc(doc(guideReviewsCollectionRef, docSnap.id));
+                            if (guideReviewSnap.exists()) {
+                                guideReviewDoc = guideReviewSnap.data();
+                            }
+                        }
+
+                        tripStatus = tripDoc.status.toUpperCase()
+                        statusColor = tripDoc.status === 'pending' ? 'gray'
+                            : (tripDoc.status === 'booked' ? 'yellow'
+                                : (tripDoc.status === 'started' ? 'green'
+                                    : (tripDoc.status === 'canceled' ? 'red'
+                                        : (tripDoc.status === 'finished' ? 'blue' : 'black'))))
+                        reservationDate = tripDoc.date.toDate().toLocaleString()
+                        creationDate = tripDoc.creationDate.toDate().toLocaleString()
+                        acceptedDate = tripDoc.acceptedDate?.toDate().toLocaleString()
+                        canceledDate = tripDoc.canceledDate?.toDate().toLocaleString()
+                        startedDate = tripDoc.startedDate?.toDate().toLocaleString()
+                        finishedDate = tripDoc.finishedDate?.toDate().toLocaleString()
+                        reservationType = acceptedDate != null ? 'GoNow' : 'Scheduled'
+                    } else {
+                        erro = "Documento não encontrado!";
                     }
+                } catch (e) {
+                    erro = "Erro ao carregar documento: " + e.message;
+                } finally {
+                    carregando = false;
                 }
+            });
 
-                if (tripDoc.clientRef) {
-                    const clientSnap = await getDoc(tripDoc.clientRef);
-                    if (clientSnap.exists()) {
-                        client = clientSnap.data();
-                        clientId = clientSnap.id;
-                    }
-                }
-
-                if (tripDoc.guideRef) {
-                    const guideSnap = await getDoc(tripDoc.guideRef);
-                    if (guideSnap.exists()) {
-                        guide = guideSnap.data();
-                        guideName = guide.name
-                        guideId = guideSnap.id;
-                    }
-                }
-
-                if (tripDoc.rateSubmitted) {
-                    const tourReviewsCollectionRef = collection(tripDoc.tourId, "reviews");
-                    const tourReviewSnap = await getDoc(doc(tourReviewsCollectionRef, docSnap.id));
-                    if (tourReviewSnap.exists()) {
-                        tourReviewDoc = tourReviewSnap.data();
-                    }
-                    const guideReviewsCollectionRef = collection(tripDoc.guideRef, "reviews");
-                    const guideReviewSnap = await getDoc(doc(guideReviewsCollectionRef, docSnap.id));
-                    if (guideReviewSnap.exists()) {
-                        guideReviewDoc = guideReviewSnap.data();
-                    }
-                }
-
-                tripStatus = tripDoc.status.toUpperCase()
-                statusColor = tripDoc.status === 'pending' ? 'gray'
-                        : (tripDoc.status === 'booked' ? 'yellow'
-                        : (tripDoc.status === 'started' ? 'green'
-                        : (tripDoc.status === 'canceled' ? 'red'
-                        : (tripDoc.status === 'finished' ? 'blue' : 'black'))))
-                reservationDate = tripDoc.date.toDate().toLocaleString()
-                creationDate = tripDoc.creationDate.toDate().toLocaleString()
-                acceptedDate = tripDoc.acceptedDate?.toDate().toLocaleString()
-                canceledDate = tripDoc.canceledDate?.toDate().toLocaleString()
-                startedDate = tripDoc.startedDate?.toDate().toLocaleString()
-                finishedDate = tripDoc.finishedDate?.toDate().toLocaleString()
-                reservationType = acceptedDate != null ? 'GoNow' : 'Scheduled'
-            } else {
-                erro = "Documento não encontrado!";
-            }
+            return () => {
+                unsubscribe();
+            };
         } catch (e) {
             erro = "Erro ao carregar documento: " + e.message;
-        } finally {
-            carregando = false;
         }
     });
+
+    const cancelTrip = async () => {
+        const docRef = doc(db, "trips", tripId);
+        await updateDoc(docRef, "canceledDate", serverTimestamp(), "status", "canceled")
+    };
 </script>
 <div class="w-full" style="margin: 20px">
     <div class="flex items-center space-x-2">
@@ -246,9 +263,16 @@
                         </Timeline>
                     </div>
                 </div>
-                {#if tripDoc.status==="booked" }
+                {#if tripDoc.status==="booked" || tripDoc.status==="pending" }
                     <div class="mb-6">
-                        <Button color="red">Cancel Trip</Button>
+                        <Button color="red"  on:click={() => (cancelConfirmation = true)}>Cancel Trip</Button>
+                        <Modal title="Cancel Trip" bind:open={cancelConfirmation} autoclose>
+                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to cancel the Trip.</p>
+                            <svelte:fragment slot="footer">
+                                <Button on:click={cancelTrip}>Yes</Button>
+                                <Button color="alternative">No</Button>
+                            </svelte:fragment>
+                        </Modal>
                     </div>
                 {/if}
                 <hr class="double">
