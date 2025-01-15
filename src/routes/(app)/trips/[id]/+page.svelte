@@ -9,16 +9,15 @@
         Timeline,
         TimelineItem,
         Rating,
-        Textarea, Modal
+        Textarea, Modal, Select
     } from 'flowbite-svelte';
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
-    import {collection, doc, getDoc, updateDoc, serverTimestamp, onSnapshot} from "firebase/firestore";
+    import { collection, doc, getDoc, serverTimestamp, onSnapshot, addDoc, updateDoc } from "firebase/firestore";
     import { page } from "$app/stores";
-    import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';// Para acessar o ID da URL
-
-    export let data; // Opcional, se estiver usando carregamento no server
+    import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
+    import { auth } from '$lib';
 
     let cancelConfirmation = false;
     let tripId = null;
@@ -44,6 +43,12 @@
     let tripStatus = '';
     let statusColor = 'gray';
     let unsubscribe;
+    let cancelReasons = [
+        { value: 'guideRequest', name: 'Guide Request' },
+        { value: 'clientRequest', name: 'Client Request' },
+    ];
+    let selectedCancelReason = '';
+    let notes = '';
 
     onMount(async () => {
         try {
@@ -124,9 +129,48 @@
         }
     });
 
-    const cancelTrip = async () => {
+    const sendNotification = async (token, title, body) => {
+        try {
+            const response = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, title, body }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Notification sent successfully:", result);
+            } else {
+                const error = await response.json();
+                console.error("Error sending notification:", error);
+            }
+        } catch (error) {
+            console.error("Request failed:", error);
+        }
+    };
+
+    const cancelTrip = async (reason, notes) => {
         const docRef = doc(db, "trips", tripId);
+        const actionsCollection = collection(docRef, "events");
+
+        await addDoc(actionsCollection, {
+            "creationDate": serverTimestamp(),
+            "action": "canceled",
+            "reason": reason,
+            "notes": notes,
+            "createdBy": auth.currentUser.uid
+        })
         await updateDoc(docRef, "canceledDate", serverTimestamp(), "status", "canceled")
+
+        if (guide != null) {
+            await sendNotification(guide.firebaseToken, "Tour Canceled", "Your tour "+ tripDoc.reservationId +" of "+ tripDoc.date.toDate().toLocaleString() +" has been canceled")
+        }
+
+        if (client != null) {
+            await sendNotification(client.firebaseToken, "Tour Canceled", "Your tour "+ tripDoc.reservationId +" of "+ tripDoc.date.toDate().toLocaleString() +" has been canceled")
+        }
+
+        cancelConfirmation = false;
     };
 </script>
 <div class="w-full" style="margin: 20px">
@@ -266,11 +310,19 @@
                 {#if tripDoc.status==="booked" || tripDoc.status==="pending" }
                     <div class="mb-6">
                         <Button color="red"  on:click={() => (cancelConfirmation = true)}>Cancel Trip</Button>
-                        <Modal title="Cancel Trip" bind:open={cancelConfirmation} autoclose>
-                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to cancel the Trip.</p>
+                        <Modal title="Cancel Trip" bind:open={cancelConfirmation}>
+                            <Label class="space-y-2">
+                                <Select class="mt-2" placeholder="Select a cancel reason..." items={cancelReasons} bind:value={selectedCancelReason} required/>
+                            </Label>
+                            <Label class="space-y-2">
+                                <span>Notes</span>
+                                <Textarea id="textarea-id" placeholder="" rows="4" name="message" bind:value={notes}/>
+                            </Label>
                             <svelte:fragment slot="footer">
-                                <Button on:click={cancelTrip}>Yes</Button>
-                                <Button color="alternative">No</Button>
+                                <Button type="submit"
+                                        on:click={() => cancelTrip(selectedCancelReason, notes)}
+                                        disabled={!selectedCancelReason}>Yes</Button>
+                                <Button on:click={() => { cancelConfirmation = false }} color="alternative">No</Button>
                             </svelte:fragment>
                         </Modal>
                     </div>
