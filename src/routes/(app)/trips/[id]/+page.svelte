@@ -44,6 +44,8 @@
     let statusColor = 'gray';
     let unsubscribe;
     let cancelReasons = [
+        { value: 'guideNoShow', name: 'Guide did not show up' },
+        { value: 'clientNoShow', name: 'Client did not show up' },
         { value: 'guideRequest', name: 'Guide Request' },
         { value: 'clientRequest', name: 'Client Request' },
     ];
@@ -110,7 +112,7 @@
                         canceledDate = tripDoc.canceledDate?.toDate().toLocaleString()
                         startedDate = tripDoc.startedDate?.toDate().toLocaleString()
                         finishedDate = tripDoc.finishedDate?.toDate().toLocaleString()
-                        reservationType = acceptedDate != null ? 'GoNow' : 'Scheduled'
+                        reservationType = acceptedDate != null ? 'GoNow' : 'Booking'
                     } else {
                         erro = "Documento não encontrado!";
                     }
@@ -307,26 +309,26 @@
                         </Timeline>
                     </div>
                 </div>
-                {#if tripDoc.status==="booked" || tripDoc.status==="pending" }
                     <div class="mb-6">
-                        <Button color="red"  on:click={() => (cancelConfirmation = true)}>Cancel Trip</Button>
-                        <Modal title="Cancel Trip" bind:open={cancelConfirmation}>
-                            <Label class="space-y-2">
-                                <Select class="mt-2" placeholder="Select a cancel reason..." items={cancelReasons} bind:value={selectedCancelReason} required/>
-                            </Label>
-                            <Label class="space-y-2">
-                                <span>Notes</span>
-                                <Textarea id="textarea-id" placeholder="" rows="4" name="message" bind:value={notes}/>
-                            </Label>
-                            <svelte:fragment slot="footer">
-                                <Button type="submit"
-                                        on:click={() => cancelTrip(selectedCancelReason, notes)}
-                                        disabled={!selectedCancelReason}>Yes</Button>
-                                <Button on:click={() => { cancelConfirmation = false }} color="alternative">No</Button>
-                            </svelte:fragment>
-                        </Modal>
+                        {#if tripDoc.status==="booked" || tripDoc.status==="pending" }
+                            <Button color="red"  on:click={() => (cancelConfirmation = true)}>Cancel Trip</Button>
+                            <Modal title="Cancel Trip" bind:open={cancelConfirmation}>
+                                <Label class="space-y-2">
+                                    <Select class="mt-2" placeholder="Select a cancel reason..." items={cancelReasons} bind:value={selectedCancelReason} required/>
+                                </Label>
+                                <Label class="space-y-2">
+                                    <span>Notes</span>
+                                    <Textarea id="textarea-id" placeholder="" rows="4" name="message" bind:value={notes}/>
+                                </Label>
+                                <svelte:fragment slot="footer">
+                                    <Button type="submit"
+                                            on:click={() => cancelTrip(selectedCancelReason, notes)}
+                                            disabled={!selectedCancelReason}>Yes</Button>
+                                    <Button on:click={() => { cancelConfirmation = false }} color="alternative">No</Button>
+                                </svelte:fragment>
+                            </Modal>
+                        {/if}
                     </div>
-                {/if}
                 <hr class="double">
                 {#if guideReviewDoc != null && tourReviewDoc != null }
                     <div class="row">
