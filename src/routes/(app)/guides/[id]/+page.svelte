@@ -175,8 +175,9 @@
                 </div>
             </div>
         </Card>
-        <Card size="xl" style="margin-top: 20px">
-            <p><strong>Submit Date:</strong> {new Date(documents.submitDate.seconds * 1000).toLocaleString()}</p>
+        {#if documents != null}
+            <Card size="xl" style="margin-top: 20px">
+            <p><strong>Submit Date:</strong>{  (documents != null && documents.submitDate != null) ? new Date(documents.submitDate.seconds * 1000).toLocaleString() : '' }</p>
             <Accordion style="margin-top: 20px; margin-bottom: 20px">
                 <AccordionItem>
                     <span slot="header">Documento de Identificação</span>
@@ -292,6 +293,7 @@
                 </AccordionItem>
             </Accordion>
         </Card>
+        {/if}
     {/if}
 </div>
 <style>
