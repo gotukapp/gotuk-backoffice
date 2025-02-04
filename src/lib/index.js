@@ -20,3 +20,22 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+export const sendNotification = async (token, title, body) => {
+    try {
+        const response = await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, title, body }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("Notification sent successfully:", result);
+        } else {
+            const error = await response.json();
+            console.error("Error sending notification:", error);
+        }
+    } catch (error) {
+        console.error("Request failed:", error);
+    }
+};

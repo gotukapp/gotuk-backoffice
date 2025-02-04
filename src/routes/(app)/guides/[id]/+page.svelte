@@ -14,7 +14,7 @@
     } from 'flowbite-svelte';
     import { ArrowLeftOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
-    import { db } from '$lib'
+    import {db, sendNotification} from '$lib'
     import {collection, doc, getDoc, orderBy, query, limit, getDocs, updateDoc} from "firebase/firestore";
     import { page } from "$app/stores";
     import { slide } from "svelte/transition";
@@ -54,6 +54,9 @@
         const documentRef = doc(db, "users", $page.params.id)
         await updateDoc(documentRef, { "accountValidated": !currentState })
         guide.accountValidated = !currentState
+        const notificationTitle = guide.accountValidated ?  "Account validated" : "Account blocked"
+        const notificationBody = guide.accountValidated ?  "Your account has been validated. Everything is ready for you to receive bookings." : "Your account has been blocked. Please check the app for invalid documents."
+        await sendNotification(guide.firebaseToken, notificationTitle, notificationBody)
         alertMessage = guide.accountValidated ?  "Account successfully validated" : "Account successfully blocked"
         showAlert = true
         setTimeout(() => {
