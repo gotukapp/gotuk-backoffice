@@ -1,42 +1,44 @@
 <script>
     import {Input, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
-    import {collection, getDoc, getDocs, query, orderBy} from "firebase/firestore";
+    import {collection, getDoc, query, orderBy, onSnapshot} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
+    import {writable} from "svelte/store";
 
-    let items = $state([]);
+    let items = writable([]);
     let searchQuery = $state('');
     let order = '';
 
-    onMount(async () => {
-        const q = query(
-            collection(db, "trips"),
-            orderBy("creationDate", "desc")
-        );
-        const querySnapshot = await getDocs(q);
-        const result = await Promise.all(
-            querySnapshot.docs.map(async (postDoc) => {
-                const postData = postDoc.data();
+    onMount(() => {
+        const q = query(collection(db, "trips"), orderBy("creationDate", "desc"));
 
-                // Fetch the referenced user data
-                if (postData.clientRef) {
-                    const clientDoc = await getDoc(postData.clientRef);
-                    postData.client = clientDoc.exists() ? clientDoc.data() : null;
-                }
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+            const result = await Promise.all(
+                querySnapshot.docs.map(async (postDoc) => {
+                    const postData = postDoc.data();
 
-                if (postData.guideRef) {
-                    const guideDoc = await getDoc(postData.guideRef);
-                    postData.guide = guideDoc.exists() ? guideDoc.data() : null;
-                }
+                    // Fetch the referenced user data
+                    if (postData.clientRef) {
+                        const clientDoc = await getDoc(postData.clientRef);
+                        postData.client = clientDoc.exists() ? clientDoc.data() : null;
+                    }
 
-                return {
-                    id: postDoc.id,
-                    ...postData
-                };
-            })
-        );
-        result.forEach(i => items.push(i))
+                    if (postData.guideRef) {
+                        const guideDoc = await getDoc(postData.guideRef);
+                        postData.guide = guideDoc.exists() ? guideDoc.data() : null;
+                    }
 
+                    return {
+                        id: postDoc.id,
+                        ...postData
+                    };
+                })
+            );
+
+            items.set(result);
+        });
+
+        return () => unsubscribe();
     });
 
     function filterTrips(item) {
@@ -105,7 +107,7 @@
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-        {#each items.filter(filterTrips) as item}
+        {#each $items.filter(filterTrips) as item}
             <TableBodyRow>
                 <TableBodyCell>{item.reservationId}</TableBodyCell>
                 <TableBodyCell>{item.client.name}</TableBodyCell>
