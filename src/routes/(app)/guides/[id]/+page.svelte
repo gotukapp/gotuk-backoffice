@@ -159,6 +159,10 @@
                     <Input id="name" bind:value={guide.phone} readonly/>
                 </div>
                 <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Languages</Label>
+                    <Input id="name" value={guide.language.toString().toUpperCase()} readonly/>
+                </div>
+                <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Rating</Label>
                     <Rating id="example-3" total={5} rating={guide.rating}>
                         <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">{guide.rating} out of 5

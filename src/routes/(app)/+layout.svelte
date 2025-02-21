@@ -8,7 +8,7 @@
         UserSolid,
         ArrowRightToBracketOutline,
         EditOutline,
-        ProfileCardSolid, TruckSolid, LandmarkSolid
+        ProfileCardSolid, TruckSolid, LandmarkSolid, StoreSolid, MapPinAltSolid
     } from 'flowbite-svelte-icons';
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
@@ -66,7 +66,7 @@
             </SidebarItem>
             <SidebarItem label="Trips" href="/trips" on:click={() => activeUrl = '/trips'} active={activeUrl === '/trips'}>
                 <svelte:fragment slot="icon">
-                    <TruckSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                    <MapPinAltSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
             <SidebarItem label="Guides" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
@@ -82,6 +82,16 @@
             <SidebarItem label="Tours" href="/tours" on:click={() => activeUrl = '/tours'} active={activeUrl === '/tours'}>
                 <svelte:fragment slot="icon">
                     <LandmarkSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                </svelte:fragment>
+            </SidebarItem>
+            <SidebarItem label="Tuks" href="/tuks" on:click={() => activeUrl = '/tuks'} active={activeUrl === '/tuks'}>
+                <svelte:fragment slot="icon">
+                    <TruckSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                </svelte:fragment>
+            </SidebarItem>
+            <SidebarItem label="Organizations" href="/organizations" on:click={() => activeUrl = '/organizations'} active={activeUrl === '/organizations'}>
+                <svelte:fragment slot="icon">
+                    <StoreSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                 </svelte:fragment>
             </SidebarItem>
             <SidebarItem label="Sign In">

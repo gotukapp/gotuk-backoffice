@@ -13,18 +13,19 @@
     } from 'flowbite-svelte';
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
-    import { db } from '$lib'
+    import { db, sendNotification } from '$lib'
     import { collection, doc, getDoc, serverTimestamp, onSnapshot, addDoc, updateDoc } from "firebase/firestore";
     import { page } from "$app/stores";
     import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
     import { auth } from '$lib';
 
     let cancelConfirmation = false;
+    let guidesAvailable = false;
     let tripId = null;
     let tripDoc = null;
     let guideReviewDoc = null;
     let tourReviewDoc = null;
-    let carregando = true;
+    let loading = true;
     let erro = null;
     let reservationDate = '';
     let reservationType = '';
@@ -119,7 +120,7 @@
                 } catch (e) {
                     erro = "Erro ao carregar documento: " + e.message;
                 } finally {
-                    carregando = false;
+                    loading = false;
                 }
             });
 
@@ -131,27 +132,12 @@
         }
     });
 
-    const sendNotification = async (token, title, body) => {
-        try {
-            const response = await fetch('/api/notifications', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, title, body }),
-            });
+    function searchAvailableGuides() {
+        guidesAvailable = true;
 
-            if (response.ok) {
-                const result = await response.json();
-                console.log("Notification sent successfully:", result);
-            } else {
-                const error = await response.json();
-                console.error("Error sending notification:", error);
-            }
-        } catch (error) {
-            console.error("Request failed:", error);
-        }
-    };
+    }
 
-    const cancelTrip = async (reason, notes) => {
+    const cancelTrip = async (date, reason, notes) => {
         const docRef = doc(db, "trips", tripId);
         const actionsCollection = collection(docRef, "events");
 
@@ -178,11 +164,11 @@
 <div class="w-full" style="margin: 20px">
     <div class="flex items-center space-x-2">
         <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
-        {#if !carregando}
+        {#if !loading}
             <Label for="input-group-1" class="text-gray-900">Trip: {tripDoc.reservationId}</Label>
         {/if}
     </div>
-    {#if carregando}
+    {#if loading}
         <p style="margin-top: 20px"><Spinner/> Loading Trip...</p>
     {:else if erro}
         <p>{erro}</p>
@@ -322,10 +308,16 @@
                                 </Label>
                                 <svelte:fragment slot="footer">
                                     <Button type="submit"
-                                            on:click={() => cancelTrip(selectedCancelReason, notes)}
+                                            on:click={() => cancelTrip(tripDoc.date, selectedCancelReason, notes)}
                                             disabled={!selectedCancelReason}>Yes</Button>
                                     <Button on:click={() => { cancelConfirmation = false }} color="alternative">No</Button>
                                 </svelte:fragment>
+                            </Modal>
+                        {/if}
+                        {#if tripDoc.status==="pending" }
+                            <Button color="blue"  on:click={searchAvailableGuides} style="margin-left: 20px">Guides Available</Button>
+                            <Modal title="Guides Available" bind:open={guidesAvailable}>
+
                             </Modal>
                         {/if}
                     </div>

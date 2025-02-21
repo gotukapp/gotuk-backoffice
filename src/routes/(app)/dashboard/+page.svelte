@@ -111,7 +111,7 @@
         let currentDay = new Date();
 
         for (let i = 0; i < daysCount; i++) {
-            const day = new Date(currentDay);
+            const day = new Date(currentDay.setHours(0,0,0));
             const formattedDay = day.toLocaleDateString();
             const count = await countBookedTripsByDay(day);
 
@@ -174,8 +174,9 @@
     async function countBookedTripsByDay(day) {
         const q = query(
             collection(db, "trips"),
-            where("date", ">", day),
-            where("date", "<", new Date(day.setDate(day.getDate() + 1)))
+            where("status", "==", 'booked'),
+            where("date", ">=", day),
+            where("date", "<", day.setDate(day.getDate() + 1))
         );
 
         try {

@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import { db } from '$lib'
     import { doc, getDoc } from "firebase/firestore";
-    import { page } from "$app/stores"; // Para acessar o ID da URL
+    import { page } from "$app/stores";
 
     let document = null;
     let loading = true;
@@ -13,7 +13,7 @@
     onMount(async () => {
         try {
             const id = $page.params.id;
-            const docRef = doc(db, "tours", id);
+            const docRef = doc(db, "organizations", id);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -30,8 +30,9 @@
 </script>
 <div class="w-full" style="margin: 20px">
     <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
+
     {#if loading}
-        <p style="margin-top: 20px"><Spinner/> Loading Trip...</p>
+        <p style="margin-top: 20px"><Spinner/> Loading Organization...</p>
     {:else if error}
         <p>{error}</p>
     {:else}
@@ -40,22 +41,6 @@
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Name</Label>
                     <Input id="name" bind:value={document.name} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Duration</Label>
-                    <Input id="name" bind:value={document.durationDescription} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Low Price</Label>
-                    <Input id="name" bind:value={document.lowPrice} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">High Price</Label>
-                    <Input id="name" bind:value={document.highPrice} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Pickup Point</Label>
-                    <Input id="name" bind:value={document.pickupPoint} readonly/>
                 </div>
             </div>
         </Card>

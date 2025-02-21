@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import { db } from '$lib'
     import { doc, getDoc } from "firebase/firestore";
-    import { page } from "$app/stores"; // Para acessar o ID da URL
+    import { page } from "$app/stores";
 
     let document = null;
     let loading = true;
@@ -13,7 +13,7 @@
     onMount(async () => {
         try {
             const id = $page.params.id;
-            const docRef = doc(db, "tours", id);
+            const docRef = doc(db, "tuktuks", id);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -29,33 +29,26 @@
     });
 </script>
 <div class="w-full" style="margin: 20px">
-    <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
+    <div class="flex items-center space-x-2">
+        <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
+        {#if !loading}
+            <Label for="input-group-1" class="text-gray-900">Tuk: {document.licensePlate}</Label>
+        {/if}
+    </div>
     {#if loading}
-        <p style="margin-top: 20px"><Spinner/> Loading Trip...</p>
+        <p style="margin-top: 20px"><Spinner/> Loading Tuk...</p>
     {:else if error}
         <p>{error}</p>
     {:else}
         <Card size="lg" style="margin-top: 20px">
             <div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Name</Label>
-                    <Input id="name" bind:value={document.name} readonly/>
+                    <Label for="input-group-1" class="block mb-2">Seats</Label>
+                    <Input id="name" bind:value={document.seats} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Duration</Label>
-                    <Input id="name" bind:value={document.durationDescription} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Low Price</Label>
-                    <Input id="name" bind:value={document.lowPrice} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">High Price</Label>
-                    <Input id="name" bind:value={document.highPrice} readonly/>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Pickup Point</Label>
-                    <Input id="name" bind:value={document.pickupPoint} readonly/>
+                    <Label for="input-group-1" class="block mb-2">Electric</Label>
+                    <Input id="name" bind:value={document.electric} readonly/>
                 </div>
             </div>
         </Card>
