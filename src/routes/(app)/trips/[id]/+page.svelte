@@ -13,7 +13,7 @@
     } from 'flowbite-svelte';
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
-    import { db, sendNotification } from '$lib'
+    import { db } from '$lib'
     import { collection, doc, getDoc, serverTimestamp, onSnapshot, addDoc, updateDoc } from "firebase/firestore";
     import { page } from "$app/stores";
     import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
@@ -140,7 +140,6 @@
     const cancelTrip = async (date, reason, notes) => {
         const docRef = doc(db, "trips", tripId);
         const actionsCollection = collection(docRef, "events");
-
         await addDoc(actionsCollection, {
             "creationDate": serverTimestamp(),
             "action": "canceled",
@@ -149,15 +148,6 @@
             "createdBy": auth.currentUser.uid
         })
         await updateDoc(docRef, "canceledDate", serverTimestamp(), "status", "canceled")
-
-        if (guide != null) {
-            await sendNotification(guide.firebaseToken, "Tour Canceled", "Your tour "+ tripDoc.reservationId +" of "+ tripDoc.date.toDate().toLocaleString() +" has been canceled")
-        }
-
-        if (client != null) {
-            await sendNotification(client.firebaseToken, "Tour Canceled", "Your tour "+ tripDoc.reservationId +" of "+ tripDoc.date.toDate().toLocaleString() +" has been canceled")
-        }
-
         cancelConfirmation = false;
     };
 </script>
