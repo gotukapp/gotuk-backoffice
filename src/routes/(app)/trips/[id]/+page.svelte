@@ -14,26 +14,32 @@
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
-    import { collection, doc, getDoc, serverTimestamp, onSnapshot, addDoc, updateDoc } from "firebase/firestore";
+    import {
+        collection,
+        doc,
+        getDoc,
+        serverTimestamp,
+        onSnapshot,
+        addDoc,
+        updateDoc,
+        query, orderBy
+    } from "firebase/firestore";
     import { page } from "$app/stores";
     import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
     import { auth } from '$lib';
+    import {writable} from "svelte/store";
 
     let cancelConfirmation = false;
     let guidesAvailable = false;
     let tripId = null;
-    let tripDoc = null;
+    let tripDoc = writable(null);
+    let tripEvents = writable([]);
     let guideReviewDoc = null;
     let tourReviewDoc = null;
     let loading = true;
     let erro = null;
     let reservationDate = '';
     let reservationType = '';
-    let creationDate = '';
-    let acceptedDate = '';
-    let canceledDate = '';
-    let startedDate = '';
-    let finishedDate = '';
     let client = null;
     let clientId = '';
     let guide = null;
@@ -43,7 +49,8 @@
     let tourId = '';
     let tripStatus = '';
     let statusColor = 'gray';
-    let unsubscribe;
+    let unsubscribeTrip;
+    let unsubscribeEvents;
     let cancelReasons = [
         { value: 'guideNoShow', name: 'Guide did not show up' },
         { value: 'clientNoShow', name: 'Client did not show up' },
@@ -58,7 +65,7 @@
             tripId = $page.params.id;
             const docRef = doc(db, "trips", tripId);
 
-            unsubscribe = onSnapshot(docRef, async (docSnap) => {
+            unsubscribeTrip = onSnapshot(docRef, async (docSnap) => {
                 try {
                     if (docSnap.exists()) {
                         tripDoc = docSnap.data();
@@ -108,12 +115,8 @@
                                     : (tripDoc.status === 'canceled' ? 'red'
                                         : (tripDoc.status === 'finished' ? 'blue' : 'black'))))
                         reservationDate = tripDoc.date.toDate().toLocaleString()
-                        creationDate = tripDoc.creationDate.toDate().toLocaleString()
-                        acceptedDate = tripDoc.acceptedDate?.toDate().toLocaleString()
-                        canceledDate = tripDoc.canceledDate?.toDate().toLocaleString()
-                        startedDate = tripDoc.startedDate?.toDate().toLocaleString()
-                        finishedDate = tripDoc.finishedDate?.toDate().toLocaleString()
-                        reservationType = acceptedDate != null ? 'GoNow' : 'Booking'
+                        reservationType = tripDoc.reservationType
+
                     } else {
                         erro = "Documento não encontrado!";
                     }
@@ -124,8 +127,20 @@
                 }
             });
 
+            const tripEventsCollectionRef = collection(docRef, "events");
+            const q = query(tripEventsCollectionRef, orderBy("creationDate"));
+
+            unsubscribeEvents = onSnapshot(q, (querySnapshot) => {
+                let events = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                tripEvents.set(events);
+            });
+
             return () => {
-                unsubscribe();
+                if (unsubscribeTrip) unsubscribeTrip();
+                if (unsubscribeEvents) unsubscribeEvents();
             };
         } catch (e) {
             erro = "Erro ao carregar documento: " + e.message;
@@ -135,6 +150,22 @@
     function searchAvailableGuides() {
         guidesAvailable = true;
 
+    }
+
+    function eventReason(reason) {
+        if (reason === "clientRequest") {
+            return "Client request"
+        }
+
+        if (reason === "guideRequest") {
+            return "Guide request"
+        }
+
+        if (reason === "guideUnavailable") {
+            return "No available guides were found"
+        }
+
+        return reason
     }
 
     const cancelTrip = async (date, reason, notes) => {
@@ -238,51 +269,33 @@
                         </div>
                     </div>
                     <div style="float: right; width: 40%">
-                        <Timeline order="vertical">
-                            <TimelineItem title="Created" bind:date={creationDate}>
-                                <svelte:fragment slot="icon">
-                                      <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
-                                        <CalendarWeekSolid class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                                      </span>
-                                </svelte:fragment>
-                            </TimelineItem>
-                            {#if acceptedDate}
-                                <TimelineItem title="Accepted" bind:date={acceptedDate}>
-                                    <svelte:fragment slot="icon">
-                                      <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-green-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
-                                        <CheckCircleSolid class="w-4 h-4 text-green-600 dark:text-green-400" />
-                                      </span>
-                                    </svelte:fragment>
-                                </TimelineItem>
-                            {/if}
-                            {#if canceledDate}
-                                <TimelineItem title="Canceled" bind:date={canceledDate}>
-                                    <svelte:fragment slot="icon">
-                                      <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-red-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
-                                        <CloseCircleSolid class="w-4 h-4 text-red-600 dark:text-red-400" />
-                                      </span>
-                                    </svelte:fragment>
-                                </TimelineItem>
-                            {/if}
-                            {#if startedDate}
-                                <TimelineItem title="Started" bind:date={startedDate}>
-                                    <svelte:fragment slot="icon">
-                                      <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-green-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
-                                        <PlaySolid class="w-4 h-4 text-green-600 dark:text-green-400" />
-                                      </span>
-                                    </svelte:fragment>
-                                </TimelineItem>
-                            {/if}
-                            {#if finishedDate}
-                                <TimelineItem title="Finished" bind:date={finishedDate}>
-                                    <svelte:fragment slot="icon">
-                                      <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-blue-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
-                                        <FlagSolid class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                      </span>
-                                    </svelte:fragment>
-                                </TimelineItem>
-                            {/if}
-                        </Timeline>
+                        {#if $tripEvents.length > 0}
+                            <Timeline order="vertical">
+                                {#each $tripEvents as event}
+                                    <TimelineItem
+                                            title={event.action.charAt(0).toUpperCase() + event.action.slice(1)}
+                                            date={event.creationDate.toDate().toLocaleString()}>
+                                        <svelte:fragment slot="icon">
+                                              <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
+                                                {#if event.action === "created"}
+                                                  <CalendarWeekSolid class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                                                {:else if event.action === "canceled"}
+                                                  <CloseCircleSolid class="w-4 h-4 text-red-600 dark:text-red-400" />
+                                                {:else if event.action === "accepted"}
+                                                  <CheckCircleSolid class="w-4 h-4 text-green-600 dark:text-green-400" />
+                                                {:else if event.action === "started"}
+                                                  <PlaySolid class="w-4 h-4 text-green-600 dark:text-green-400" />
+                                                {:else if event.action === "finished"}
+                                                  <FlagSolid class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                {/if}
+                                              </span>
+                                        </svelte:fragment>
+                                        <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">{eventReason(event.reason)}</p>
+                                        <p class="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">{event.notes}</p>
+                                    </TimelineItem>
+                                {/each}
+                            </Timeline>
+                        {/if}
                     </div>
                 </div>
                     <div class="mb-6">
