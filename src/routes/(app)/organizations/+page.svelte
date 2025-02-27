@@ -1,6 +1,6 @@
 <script>
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import {collection, onSnapshot} from "firebase/firestore";
+    import {collection, doc, getCountFromServer, onSnapshot, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import { writable } from "svelte/store";
@@ -8,8 +8,22 @@
     let orgs = writable([]);
 
     onMount(async () => {
-        const unsubscribe = onSnapshot(collection(db, "organizations"), (snapshot) => {
-            orgs.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const unsubscribe = onSnapshot(collection(db, "organizations"), async (snapshot) => {
+            const organizations = await Promise.all(snapshot.docs.map(async (docSnap) => {
+                const orgData = { id: docSnap.id, ...docSnap.data() };
+
+                // Query for number of Tuks associated with this organization
+                const tuksQuery = query(collection(db, "tuktuks"), where("organizationRef", "==", doc(db, "organizations", orgData.id)));
+                const tuksCount = (await getCountFromServer(tuksQuery)).data().count;
+
+                // Query for number of Tuks associated with this organization
+                const guidesQuery = query(collection(db, "users"), where("organizationRef", "==", doc(db, "organizations", orgData.id)));
+                const guidesCount = (await getCountFromServer(guidesQuery)).data().count;
+
+                return { ...orgData, tuksCount, guidesCount };
+            }));
+
+            orgs.set(organizations);
         });
 
         return () => unsubscribe(); // Cleanup on unmount
@@ -22,6 +36,8 @@
     </caption>
     <TableHead>
         <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Tuks</TableHeadCell>
+        <TableHeadCell>Guides</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Edit</span>
         </TableHeadCell>
@@ -30,6 +46,8 @@
         {#each $orgs as org}
             <TableBodyRow>
                 <TableBodyCell>{org.name}</TableBodyCell>
+                <TableBodyCell>{org.tuksCount}</TableBodyCell>
+                <TableBodyCell>{org.guidesCount}</TableBodyCell>
                 <TableBodyCell>
                     <a href="/organizations/{org.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                 </TableBodyCell>
