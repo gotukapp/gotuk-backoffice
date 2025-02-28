@@ -1,5 +1,5 @@
 <script>
-    import { Card, Spinner, Button, Label, Input } from 'flowbite-svelte';
+    import {Card, Spinner, Button, Label, Input, Rating} from 'flowbite-svelte';
     import { ArrowLeftOutline } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
@@ -46,16 +46,24 @@
                     <Input id="name" bind:value={document.durationDescription} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Low Price</Label>
+                    <Label for="input-group-1" class="block mb-2">Low Price (€)</Label>
                     <Input id="name" bind:value={document.lowPrice} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">High Price</Label>
+                    <Label for="input-group-1" class="block mb-2">High Price (€)</Label>
                     <Input id="name" bind:value={document.highPrice} readonly/>
                 </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Pickup Point</Label>
                     <Input id="name" bind:value={document.pickupPoint} readonly/>
+                </div>
+                <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Rating</Label>
+                    <Rating id="example-3" total={5} rating={document.rating}>
+                        <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">{document.rating} out of 5
+                        </p>
+                    </Rating>
+                    <a href="/" class="text-sm font-medium text-gray-900 underline hover:no-underline dark:text-white"> 0 reviews </a>
                 </div>
             </div>
         </Card>
