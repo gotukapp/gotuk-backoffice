@@ -2,11 +2,12 @@
     import { Chart, Card, Button, Dropdown, DropdownItem } from 'flowbite-svelte';
     import { ChevronDownOutline } from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
-    import {collection, getCountFromServer, where, query} from "firebase/firestore";
+    import {collection, getCountFromServer, where, query, getDocs} from "firebase/firestore";
     import {db} from "$lib";
 
     let dropdownOpen = false;
-    let allTrips = null;
+    let tripsByStatus = null;
+    let tripsByTour = null;
     let bookedTrips = null;
     let selectedDateRange = "Last 30 days";
 
@@ -16,16 +17,28 @@
     });
 
     async function refreshChartOptions() {
-        const tripsSeries = [
-            await countTripsByStatus("pending", calculateDateRange(selectedDateRange)),
-            await countTripsByStatus("booked", calculateDateRange(selectedDateRange)),
-            await countTripsByStatus("started", calculateDateRange(selectedDateRange)),
-            await countTripsByStatus("finished", calculateDateRange(selectedDateRange)),
-            await countTripsByStatus("canceled", calculateDateRange(selectedDateRange))];
+        const dateRange = calculateDateRange(selectedDateRange)
 
-        allTrips = {
-            series: tripsSeries,
-            colors: ['#FDBA8C', '#16BDCA', '#E74694', '#1C64F2', '#E74694'],
+        const q = query(
+            collection(db, "trips"),
+            where("date", ">", dateRange)
+        );
+
+        const snapshot = await getDocs(q);
+        const result = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log(result)
+
+        tripsByStatus = {
+            series: [result.filter(a => a.status === "pending").length,
+                result.filter(a => a.status === "booked").length,
+                result.filter(a => a.status === "started").length,
+                result.filter(a => a.status === "finished").length,
+                result.filter(a => a.status === "canceled").length],
+            colors: ['#fa6b13',
+                '#fff300',
+                '#169100',
+                '#1c4ef2',
+                '#F21C1C'],
             chart: {
                 height: 320,
                 width: '100%',
@@ -48,7 +61,7 @@
                             total: {
                                 showAlways: true,
                                 show: true,
-                                label: 'Total trips',
+                                label: 'Total',
                                 fontFamily: 'Inter, sans-serif',
                                 formatter: function (w) {
                                     const sum = w.globals.seriesTotals.reduce((a, b) => {
@@ -94,6 +107,76 @@
                 labels: {
                     formatter: function (value) {
                         return value;
+                    }
+                },
+                axisTicks: {
+                    show: false
+                },
+                axisBorder: {
+                    show: false
+                }
+            }
+        };
+
+        console.log(result.map(a => a.tourId.id))
+
+        tripsByTour = {
+            series: [result.filter(a => a.tourId.id === "iFeHZGf61ZR6RsCxZFUf").length,
+                result.filter(a => a.tourId.id === "iPvTzM9QAK99KjlmWOQc").length,
+                result.filter(a => a.tourId.id === "lrBbhAD64JMbq81yjUAF").length,
+                result.filter(a => a.tourId.id === "s8xkuv1KCEfOAvOe5V8W").length],
+            colors: ['#3cedbb',
+                '#008dbf',
+                '#563ad1',
+                '#1d0d98' +
+                ''],
+            chart: {
+                height: 320,
+                width: '100%',
+                type: 'pie'
+            },
+            stroke: {
+                colors: ['transparent'],
+                lineCap: ''
+            },
+            plotOptions: {
+                pie: {
+                    labels: {
+                        show: true
+                    },
+                    size: '100%',
+                    dataLabels: {
+                        offset: -25
+                    }
+                }
+            },
+            grid: {
+                padding: {
+                    top: -2
+                }
+            },
+            labels: ['Discoveries in Belém', 'Lisboa New City', 'Lisboa Old City', 'Three sight hills'],
+            dataLabels: {
+                enabled: true,
+                style: {
+                    fontFamily: 'Inter, sans-serif'
+                }
+            },
+            legend: {
+                position: 'bottom',
+                fontFamily: 'Inter, sans-serif'
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (value) {
+                        return value;
+                    }
+                }
+            },
+            xaxis: {
+                labels: {
+                    formatter: function (value) {
+                        return value + '%';
                     }
                 },
                 axisTicks: {
@@ -155,33 +238,17 @@
         };
     }
 
-    async function countTripsByStatus(status, dateFilter) {
-        const q = query(
-            collection(db, "trips"),
-            where("status", "==", status),
-            where("date", ">", dateFilter)
-        );
-
-        try {
-            const snapshot = await getCountFromServer(q);
-            return snapshot.data().count;
-        } catch (error) {
-            console.error("Error counting documents:", error);
-            return 0;
-        }
-    }
-
     async function countBookedTripsByDay(day) {
+        const dayEnd = new Date(day.getTime() + (24 * 60 * 60 * 1000))
         const q = query(
             collection(db, "trips"),
             where("status", "==", 'booked'),
             where("date", ">=", day),
-            where("date", "<", day.setDate(day.getDate() + 1))
+            where("date", "<", dayEnd)
         );
 
         try {
             const snapshot = await getCountFromServer(q);
-            console.log(snapshot.data().count)
             return snapshot.data().count;
         } catch (error) {
             console.error("Error counting documents:", error);
@@ -213,7 +280,7 @@
         }
     }
 </script>
-<div class="w-full" style="margin: 20px">
+<div class="w-full p-5" style="margin: 20px">
     <div class="grid grid-cols-1">
         <div class="flex justify-between">
             <Button class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent focus:ring-transparent dark:focus:ring-transparent py-0">{selectedDateRange}<ChevronDownOutline class="w-2.5 m-2.5 ms-1.5" /></Button>
@@ -226,45 +293,56 @@
             </Dropdown>
         </div>
     </div>
-    <div class="flex flex-col justify-start">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl">
-            <Card>
-                <div class="flex justify-between items-start w-full">
-                    <div class="flex-col items-center">
-                        <div class="flex items-center mb-1">
-                            <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1">Trips</h5>
-                        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card size="xl">
+            <div class="flex justify-between items-start w-full">
+                <div class="flex-col items-center">
+                    <div class="flex items-center mb-1">
+                        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1">Tours by Status</h5>
                     </div>
                 </div>
-                {#if allTrips}
-                    <Chart options="{allTrips}" class="py-6" />
-                {:else}
-                    <div class="flex justify-center items-center py-6">
-                        <div class="loader" role="status">
-                            Loading chart...
-                        </div>
-                    </div>
-                {/if}
+            </div>
+            {#if tripsByStatus}
+                <Chart options="{tripsByStatus}" class="py-6" />
+            {:else}
+                <div class="flex justify-center items-center py-6">
+                    <div class="loader" role="status">Loading chart...</div>
+                </div>
+            {/if}
+        </Card>
 
-</Card>
-            <Card>
-                <div class="flex justify-between items-start w-full">
-                    <div class="flex-col items-center">
-                        <div class="flex items-center mb-1">
-                            <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1">Booked Trips</h5>
-                        </div>
+        <Card size="xl">
+            <div class="flex justify-between items-start w-full">
+                <div class="flex-col items-center">
+                    <div class="flex items-center mb-1">
+                        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1">Tours</h5>
                     </div>
                 </div>
-                {#if bookedTrips}
-                    <Chart bind:options={bookedTrips} />
-                {:else}
-                    <div class="flex justify-center items-center py-6">
-                        <div class="loader" role="status">
-                            Loading chart...
-                        </div>
+            </div>
+            {#if tripsByTour}
+                <Chart bind:options={tripsByTour} />
+            {:else}
+                <div class="flex justify-center items-center py-6">
+                    <div class="loader" role="status">Loading chart...</div>
+                </div>
+            {/if}
+        </Card>
+
+        <Card size="xl">
+            <div class="flex justify-between items-start w-full">
+                <div class="flex-col items-center">
+                    <div class="flex items-center mb-1">
+                        <h5 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1">Booked Tours</h5>
                     </div>
-                {/if}
-            </Card>
-        </div>
+                </div>
+            </div>
+            {#if bookedTrips}
+                <Chart bind:options={bookedTrips} />
+            {:else}
+                <div class="flex justify-center items-center py-6">
+                    <div class="loader" role="status">Loading chart...</div>
+                </div>
+            {/if}
+        </Card>
     </div>
 </div>
