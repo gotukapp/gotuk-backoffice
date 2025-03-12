@@ -1,15 +1,18 @@
 <script>
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import {collection, onSnapshot} from "firebase/firestore";
+    import {collection, onSnapshot, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {writable} from "svelte/store";
-
+    let {data} = $props()
     let tuks = writable([]);
 
-
     onMount(async () => {
-        const unsubscribe = onSnapshot(collection(db, "tuktuks"), (snapshot) => {
+        const firebaseUser = await data.getFirebaseUser();
+        const q = firebaseUser.isAdmin ?
+            collection(db, "tuktuks") :
+            query(collection(db, "tuktuks"), where("organizationRef", "==", firebaseUser.organizationRef))
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             tuks.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
 

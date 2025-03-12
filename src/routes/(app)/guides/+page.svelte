@@ -3,11 +3,15 @@
     import {collection, getDocs, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
+    let {data} = $props()
     let users = $state([])
     onMount(async () => {
-        let userQuery = query(collection(db, "users"), where("guideMode", "==", true));
-        // Executa a consulta
-        const querySnapshot = await getDocs(userQuery);
+        const firebaseUser = await data.getFirebaseUser();
+        const q = firebaseUser.isAdmin ?
+            query(collection(db, "users"), where("guideMode", "==", true)) :
+            query(collection(db, "users"), where("guideMode", "==", true), where("organizationRef", "==", firebaseUser.organizationRef))
+
+        const querySnapshot = await getDocs(q);
         users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     });
 </script>

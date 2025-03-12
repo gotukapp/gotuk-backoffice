@@ -11,7 +11,7 @@ const handlePasswordLogin = async (event) => {
     event.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-            goto('/trips')
+            goto('/dashboard')
         })
         .catch((error) => {
             alert(error.code + ' ' +error.message)
@@ -42,7 +42,7 @@ const handlePasswordLogin = async (event) => {
                 </div>
                 <Button type="submit" class="w-full1">Sign in</Button>
                 <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Don’t have an account yet? <a href="/" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up</a>
+                    Don’t have an account yet? <a href="/account" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up</a>
                 </p>
             </form>
         </div>
