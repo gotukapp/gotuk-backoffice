@@ -4,14 +4,14 @@
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {writable} from "svelte/store";
-    let {data} = $props()
+    import {authUser} from '$lib/stores/authUser.js'
     let tuks = writable([]);
 
     onMount(async () => {
-        const firebaseUser = await data.getFirebaseUser();
-        const q = firebaseUser.isAdmin ?
+        const firebaseUser = $authUser.user
+        const q = firebaseUser?.isAdmin ?
             collection(db, "tuktuks") :
-            query(collection(db, "tuktuks"), where("organizationRef", "==", firebaseUser.organizationRef))
+            query(collection(db, "tuktuks"), where("organizationRef", "==", firebaseUser?.organizationRef))
         const unsubscribe = onSnapshot(q, (snapshot) => {
             tuks.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });

@@ -30,10 +30,7 @@
     let validateAccountConfirmation = $state(false);
     let identificationNumberExpirationDate = $state("");
     let drivingLicenseExpirationDate = $state("");
-    let insuranceExpirationDate = $state("");
-    let insuranceWorkAccidentExpirationDate = $state("");
     let insurancePersonalAccidentExpirationDate = $state("");
-    let vehicleInsuranceExpirationDate = $state("");
 
     async function approve(fieldName) {
         const documentsRef = collection(doc(db, "users", $page.params.id), "documents");
@@ -96,27 +93,9 @@
                     ).toISOString().substring(0, 10);
                 }
 
-                if (documents.insuranceExpirationDate != null) {
-                    insuranceExpirationDate = new Date(
-                        documents.insuranceExpirationDate.seconds * 1000
-                    ).toISOString().substring(0, 10);
-                }
-
-                if (documents.insuranceWorkAccidentExpirationDate != null) {
-                    insuranceWorkAccidentExpirationDate = new Date(
-                        documents.insuranceWorkAccidentExpirationDate.seconds * 1000
-                    ).toISOString().substring(0, 10);
-                }
-
                 if (documents.insurancePersonalAccidentExpirationDate != null) {
                     insurancePersonalAccidentExpirationDate = new Date(
                         documents.insurancePersonalAccidentExpirationDate.seconds * 1000
-                    ).toISOString().substring(0, 10);
-                }
-
-                if (documents.vehicleInsuranceExpirationDate != null) {
-                    vehicleInsuranceExpirationDate = new Date(
-                        documents.vehicleInsuranceExpirationDate.seconds * 1000
                     ).toISOString().substring(0, 10);
                 }
             }
@@ -210,52 +189,8 @@
                     <Button pill color="light" on:click={() => approve("identificationDocuments")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
-                    <span slot="header">Comprovativo de Actividade</span>
-                    <Button pill color="light" on:click={() => approve("activity")}>Aprovar</Button>
-                </AccordionItem>
-                <AccordionItem>
-                    <span slot="header">Licença RNAAT</span>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Nº Registo</Label>
-                        <Input id="name" bind:value={documents.licenseRNAATNumber} readonly/>
-                    </div>
-                    <Button pill color="light" on:click={() => approve("licenseRNAAT")}>Aprovar</Button>
-                </AccordionItem>
-                <AccordionItem>
                     <span slot="header">Formação</span>
                     <Button pill color="light" on:click={() => approve("training")}>Aprovar</Button>
-                </AccordionItem>
-                <AccordionItem>
-                    <span slot="header">Apólice de Seguro de Responsabilidade Civil</span>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                        <Input id="name" bind:value={documents.insuranceCompanyName} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                        <Input id="name" bind:value={documents.insurancePolicyNumber} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                        <Input id="name" bind:value={insuranceExpirationDate} readonly/>
-                    </div>
-                    <Button pill color="light" on:click={() => approve("civilLiabilityInsurancePolicy")}>Aprovar</Button>
-                </AccordionItem>
-                <AccordionItem>
-                    <span slot="header">Apólice de seguro de Acidentes de trabalho</span>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                        <Input id="name" bind:value={documents.insuranceWorkAccidentCompanyName} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                        <Input id="name" bind:value={documents.insuranceWorkAccidentPolicyNumber} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                        <Input id="name" bind:value={insuranceWorkAccidentExpirationDate} readonly/>
-                    </div>
-                    <Button pill color="light" on:click={() => approve("workAccidentInsurancePolicy")}>Aprovar</Button>
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header">Apólice de Seguro de Acidentes Pessoais</span>
@@ -272,34 +207,6 @@
                         <Input id="name" bind:value={insurancePersonalAccidentExpirationDate} readonly/>
                     </div>
                     <Button pill color="light" on:click={() => approve("personalAccidentInsurancePolicy")}>Aprovar</Button>
-                </AccordionItem>
-                <AccordionItem>
-                    <span slot="header">Dados do Veículo</span>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Matrícula</Label>
-                        <Input id="name" bind:value={documents.vehicleLicensePlate} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Lugares</Label>
-                        <Input id="name" bind:value={documents.vehicleSeatsNumber} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Veículo Eléctrico</Label>
-                        <Input id="name" bind:value={documents.vehicleType} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                        <Input id="name" bind:value={documents.vehicleInsuranceCompanyName} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                        <Input id="name" bind:value={documents.vehicleInsurancePolicyNumber} readonly/>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                        <Input id="name" bind:value={vehicleInsuranceExpirationDate} readonly/>
-                    </div>
-                    <Button pill color="light" on:click={() => approve("vehicleData")}>Aprovar</Button>
                 </AccordionItem>
             </Accordion>
         </Card>

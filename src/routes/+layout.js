@@ -1,6 +1,5 @@
-import {auth, db} from '$lib';
+import {auth} from '$lib';
 import { onAuthStateChanged } from 'firebase/auth';
-import {doc, getDoc} from "firebase/firestore";
 
 export async function load({ url }) {
     function getAuthUser() {
@@ -9,16 +8,8 @@ export async function load({ url }) {
         });
     }
 
-    async function getFirebaseUser() {
-        const user = await getAuthUser()
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        return docSnap.data();
-    }
-
     return {
         getAuthUser,
-        getFirebaseUser,
         url: url.pathname
     };
 }

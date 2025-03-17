@@ -56,9 +56,11 @@
                 <NavLi href="/contact">Contact</NavLi>
             </NavUl>
         {:else}
-            <NavUl>
-                <NavLi href="/guides" active={true}>Home</NavLi>
-            </NavUl>
+            {#if $authUser.user?.organizationRef !== undefined}
+                <NavUl>
+                    <NavLi href="/guides" active={true}>Home</NavLi>
+                </NavUl>
+            {/if}
         {/if}
     {/await}
 </Navbar>
@@ -109,8 +111,8 @@
             <Sidebar {activeUrl} >
                 <SidebarWrapper class="h-full">
                     <SidebarGroup>
-                        {#if $authUser.user?.organizationRef !== null}
-                            <SidebarItem label="Organization" href="/organizations/{$authUser.user?.organizationRef?.id}" on:click={() => activeUrl = '/organizations'} active={activeUrl === '/organizations'}>
+                        {#if $authUser.user?.organizationRef !== undefined}
+                            <SidebarItem label="Organization" href="/organizations/{$authUser.user?.organizationRef?.id}" on:click={() => activeUrl = '/organizations'} active={activeUrl.startsWith('/organizations')}>
                                 <svelte:fragment slot="icon">
                                     <StoreSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                 </svelte:fragment>

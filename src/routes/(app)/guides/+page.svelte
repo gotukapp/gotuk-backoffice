@@ -3,16 +3,19 @@
     import {collection, getDocs, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
-    let {data} = $props()
+    import {authUser} from '$lib/stores/authUser.js'
+
     let users = $state([])
     onMount(async () => {
-        const firebaseUser = await data.getFirebaseUser();
-        const q = firebaseUser.isAdmin ?
-            query(collection(db, "users"), where("guideMode", "==", true)) :
-            query(collection(db, "users"), where("guideMode", "==", true), where("organizationRef", "==", firebaseUser.organizationRef))
+        const firebaseUser = $authUser.user
+        if (firebaseUser !== null) {
+            const q = firebaseUser.isAdmin ?
+                query(collection(db, "users"), where("guideMode", "==", true)) :
+                query(collection(db, "users"), where("guideMode", "==", true), where("organizationRef", "==", firebaseUser.organizationRef))
 
-        const querySnapshot = await getDocs(q);
-        users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const querySnapshot = await getDocs(q);
+            users = querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        }
     });
 </script>
 <div class="w-full">

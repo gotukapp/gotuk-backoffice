@@ -3,7 +3,8 @@
     import {ArrowLeftOutline} from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
     import {db, storage} from '$lib'
-    import {getDownloadURL, listAll, ref, uploadBytes} from 'firebase/storage'
+    import {getAllFilesFromFolder, getStatusColor, formatDate} from '$lib/utils.js'
+    import {getDownloadURL, ref, uploadBytes} from 'firebase/storage'
     import {
         collection,
         doc,
@@ -113,26 +114,6 @@
         selectedFiles.length = 0
     }
 
-
-    async function getAllFilesFromFolder(folderPath) {
-        console.log(folderPath)
-        const folderRef = ref(storage, folderPath)
-        try {
-            const result = await listAll(folderRef)
-            console.log(result)
-            return await Promise.all(result.items.map(async (fileRef) => {
-                return getDownloadURL(fileRef) // Get each file's URL
-            }))
-        } catch (error) {
-            console.error("Error fetching files:", error)
-            return []
-        }
-    }
-
-    function getStatusColor(status) {
-        return status === 'pending' ? 'dark' : (status === 'approved' ? 'green' : 'red')
-    }
-
     async function approve(fieldName) {
         const documentsRef = collection(doc(db, "tuktuks", $page.params.id), "documents");
         const q = query(documentsRef, orderBy("submitDate", "desc"), limit(1));
@@ -147,10 +128,6 @@
         }
     }
 
-    function formatDate(timestamp) {
-        if (!timestamp) return ""
-        return new Date(timestamp.seconds * 1000).toLocaleDateString() // Adjust format as needed
-    }
 </script>
 <div class="w-full" style="margin: 20px">
     <div class="flex items-center space-x-2">

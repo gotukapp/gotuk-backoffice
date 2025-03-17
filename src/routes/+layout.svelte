@@ -12,11 +12,15 @@
         if (!loggedIn && auth.currentUser === null) {
             await goto('/login');
         } else {
-            login(await data.getFirebaseUser())
+            await login(user)
             if ($authUser.isAdmin) {
                 await goto('/dashboard');
             } else {
-                await goto('/guides')
+                if ($authUser.user?.organizationRef === null) {
+                    await goto('/organizations/create')
+                } else {
+                    await goto('/organizations/' + $authUser.user?.organizationRef.id)
+                }
             }
         }
     });
