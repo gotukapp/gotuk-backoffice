@@ -1,5 +1,5 @@
 <script>
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    import {Button, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
     import {collection, onSnapshot, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
@@ -19,11 +19,17 @@
         return () => unsubscribe(); // Cleanup on unmount
     });
 
+    async function addTuk() {
+
+    }
 </script>
 <div class="w-full">
 <Table >
-    <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-        Tuks
+    <caption class="p-5 text-lg font-semibold w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+        <div class="flex justify-between items-center w-full">
+            <span>Tuks</span>
+            <Button pill color="light" on:click={() => addTuk()}>Add</Button>
+        </div>
     </caption>
     <TableHead>
         <TableHeadCell>License Plate</TableHeadCell>

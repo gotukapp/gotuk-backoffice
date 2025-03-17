@@ -9,11 +9,6 @@ export async function load({ url }) {
         });
     }
 
-    async function isAdmin() {
-        const user = await getFirebaseUser()
-        return user.isAdmin
-    }
-
     async function getFirebaseUser() {
         const user = await getAuthUser()
         const docRef = doc(db, "users", user.uid);
@@ -23,7 +18,6 @@ export async function load({ url }) {
 
     return {
         getAuthUser,
-        isAdmin,
         getFirebaseUser,
         url: url.pathname
     };

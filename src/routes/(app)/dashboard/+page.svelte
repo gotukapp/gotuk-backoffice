@@ -26,7 +26,6 @@
 
         const snapshot = await getDocs(q);
         const result = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log(result)
 
         tripsByStatus = {
             series: [result.filter(a => a.status === "pending").length,
@@ -117,8 +116,6 @@
                 }
             }
         };
-
-        console.log(result.map(a => a.tourId.id))
 
         tripsByTour = {
             series: [result.filter(a => a.tourId.id === "iFeHZGf61ZR6RsCxZFUf").length,

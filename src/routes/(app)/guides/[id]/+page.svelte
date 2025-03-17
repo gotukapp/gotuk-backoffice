@@ -18,21 +18,22 @@
     import {collection, doc, getDoc, orderBy, query, limit, getDocs, updateDoc} from "firebase/firestore";
     import { page } from "$app/stores";
     import { slide } from "svelte/transition";
+    import { authUser } from '$lib/stores/authUser.js'
 
-    let showAlert = false;
-    let alertMessage = '';
-    let guide = null;
-    let documents = null;
-    let loading = true;
-    let error = null;
+    let showAlert = $state(false);
+    let alertMessage = $state('');
+    let guide = $state(null);
+    let documents = $state(null);
+    let loading = $state(true);
+    let error = $state(null);
 
-    let validateAccountConfirmation = false;
-    let identificationNumberExpirationDate = "";
-    let drivingLicenseExpirationDate = "";
-    let insuranceExpirationDate = "";
-    let insuranceWorkAccidentExpirationDate = "";
-    let insurancePersonalAccidentExpirationDate = "";
-    let vehicleInsuranceExpirationDate = "";
+    let validateAccountConfirmation = $state(false);
+    let identificationNumberExpirationDate = $state("");
+    let drivingLicenseExpirationDate = $state("");
+    let insuranceExpirationDate = $state("");
+    let insuranceWorkAccidentExpirationDate = $state("");
+    let insurancePersonalAccidentExpirationDate = $state("");
+    let vehicleInsuranceExpirationDate = $state("");
 
     async function approve(fieldName) {
         const documentsRef = collection(doc(db, "users", $page.params.id), "documents");
@@ -170,16 +171,18 @@
                     </Rating>
                     <a href="/" class="text-sm font-medium text-gray-900 underline hover:no-underline dark:text-white"> 73 reviews </a>
                 </div>
-                <div class="mb-6">
-                    <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{guide.accountValidated ? "Block Account" : "Validate Account"}</Button>
-                    <Modal title="{guide.accountValidated ? 'Block Account' : 'Validate Account'}" bind:open={validateAccountConfirmation} autoclose>
-                        <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to {guide.accountValidated ? "block" : "validate"} this account.</p>
-                        <svelte:fragment slot="footer">
-                            <Button on:click={() => changeAccountStatus(guide.accountValidated)}>Yes</Button>
-                            <Button color="alternative">No</Button>
-                        </svelte:fragment>
-                    </Modal>
-                </div>
+                {#if $authUser.isAdmin}
+                    <div class="mb-6">
+                        <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{guide.accountValidated ? "Block Account" : "Validate Account"}</Button>
+                        <Modal title="{guide.accountValidated ? 'Block Account' : 'Validate Account'}" bind:open={validateAccountConfirmation} autoclose>
+                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to {guide.accountValidated ? "block" : "validate"} this account.</p>
+                            <svelte:fragment slot="footer">
+                                <Button on:click={() => changeAccountStatus(guide.accountValidated)}>Yes</Button>
+                                <Button color="alternative">No</Button>
+                            </svelte:fragment>
+                        </Modal>
+                    </div>
+                {/if}
             </div>
         </Card>
         {#if documents != null}
