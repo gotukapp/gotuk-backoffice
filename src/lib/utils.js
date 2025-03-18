@@ -1,4 +1,4 @@
-import {getDownloadURL, listAll, ref} from "firebase/storage";
+import {getDownloadURL, listAll, ref, uploadBytes} from "firebase/storage";
 import {storage} from "./index.js";
 
 export async function getAllFilesFromFolder(folderPath) {
@@ -23,4 +23,23 @@ export function getStatusColor(status) {
 export function formatDate(timestamp) {
     if (!timestamp) return ""
     return new Date(timestamp.seconds * 1000).toLocaleDateString() // Adjust format as needed
+}
+
+export function openFilePicker(fileInput) {
+    fileInput.click()
+}
+
+export async function uploadImages(path, selectedFiles, uploadProgress) {
+    if (selectedFiles.length === 0) return
+    let uploadedUrls = []
+
+    for (let [index, file] of selectedFiles.entries()) {
+        const storageRef = ref(storage, `${path}/${file.name}`)
+        await uploadBytes(storageRef, file)
+        uploadProgress = (index / selectedFiles.length) * 100
+        const downloadUrl = await getDownloadURL(storageRef)
+        uploadedUrls.push(downloadUrl)
+    }
+
+    return uploadedUrls
 }
