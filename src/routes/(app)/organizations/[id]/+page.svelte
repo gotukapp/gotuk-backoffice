@@ -62,7 +62,8 @@
                 });
 
                 // Listen for live updates in users
-                const qUsers = query(collection(db, "users"), where("organizationRef", "==", docRef));
+                const qUsers = query(collection(db, "users"), where("organizationRef", "==", docRef)
+                    , where("guideMode", "==", true));
                 console.log("Querying for tuktuks with organizationRef:", docRef.path);
                 const unsubscribeUsers = onSnapshot(qUsers, (querySnapshot) => {
                     console.log("Users found:", querySnapshot.docs.length);
@@ -111,6 +112,10 @@
     {:else}
         <Card size="xl" style="margin-top: 20px">
             <div>
+                <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Code</Label>
+                    <Input id="name" bind:value={document.orgCode} readonly/>
+                </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Name</Label>
                     <Input id="name" bind:value={document.name} readonly/>

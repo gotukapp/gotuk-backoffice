@@ -26,6 +26,15 @@
             event.target.setCustomValidity('')
         }
     }
+
+    function generateRandomCode() {
+        return `${randomFourDigits()}-${randomFourDigits()}-${randomFourDigits()}`
+    }
+
+    function randomFourDigits() {
+        return Math.floor(1000 + Math.random() * 9000) // Ensures a 4-digit number
+    }
+
     async function submit(event) {
         event.preventDefault()
 
@@ -38,6 +47,7 @@
                 address: address,
                 vat: vat,
                 name: name,
+                orgCode: generateRandomCode(),
                 creationDate: serverTimestamp()
             });
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
@@ -53,7 +63,7 @@
 </script>
 <div class="w-full" style="margin: 20px">
     <Card size="xl" style="margin-top: 20px">
-        <span style="height: 40px">Criar Organização</span>
+        <span style="height: 40px">Registar Empresa</span>
             <form on:submit={submit}>
                 <div>
                     <div class="mb-6">

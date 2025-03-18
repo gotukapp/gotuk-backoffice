@@ -208,6 +208,10 @@
                     </div>
                     <Button pill color="light" on:click={() => approve("personalAccidentInsurancePolicy")}>Aprovar</Button>
                 </AccordionItem>
+                <AccordionItem>
+                    <span slot="header">Registo Criminal</span>
+                    <Button pill color="light" on:click={() => approve("training")}>Aprovar</Button>
+                </AccordionItem>
             </Accordion>
         </Card>
         {/if}

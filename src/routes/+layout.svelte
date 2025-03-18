@@ -16,7 +16,7 @@
             if ($authUser.isAdmin) {
                 await goto('/dashboard');
             } else {
-                if ($authUser.user?.organizationRef === null) {
+                if ($authUser.user?.organizationRef === undefined) {
                     await goto('/organizations/create')
                 } else {
                     await goto('/organizations/' + $authUser.user?.organizationRef.id)

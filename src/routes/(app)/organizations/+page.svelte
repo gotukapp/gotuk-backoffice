@@ -17,7 +17,8 @@
                 const tuksCount = (await getCountFromServer(tuksQuery)).data().count;
 
                 // Query for number of Tuks associated with this organization
-                const guidesQuery = query(collection(db, "users"), where("organizationRef", "==", doc(db, "organizations", orgData.id)));
+                const guidesQuery = query(collection(db, "users"), where("organizationRef", "==", doc(db, "organizations", orgData.id))
+                    , where("guideMode", "==", true));
                 const guidesCount = (await getCountFromServer(guidesQuery)).data().count;
 
                 return { ...orgData, tuksCount, guidesCount };
