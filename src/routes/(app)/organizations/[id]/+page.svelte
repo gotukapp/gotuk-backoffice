@@ -125,7 +125,7 @@
                 </div>
             </div>
         </Card>
-        <Card size="lg" style="margin-top: 20px">
+        <Card size="xl" style="margin-top: 20px">
             <Accordion style="margin-top: 20px; margin-bottom: 20px">
                 <AccordionItem>
                     {#if orgDocuments?.activityProof}

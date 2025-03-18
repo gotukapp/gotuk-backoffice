@@ -38,7 +38,7 @@
                 address: address,
                 vat: vat,
                 name: name,
-                submitDate: serverTimestamp()
+                creationDate: serverTimestamp()
             });
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
                 organizationRef: docRef
@@ -64,7 +64,7 @@
                         <Label for="input-group-1" class="block mb-2">NIF</Label>
                         <Input id="name" bind:value={vat} required oninvalid={validateField}/>
                         {#if vatError}
-                            <Helper class='mt-2' color='red'><span class="font-medium">NIF inválido. Deve ter 9 dígitos e começar com 1, 2, 5, 6, 8 ou 9.</Helper>
+                            <Helper class='mt-2' color='red'><span class="font-medium">NIF inválido. Deve ter 9 dígitos e começar com 1, 2, 5, 6, 8 ou 9.</span></Helper>
                         {/if}
                     </div>
                     <div class="mb-6">
