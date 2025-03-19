@@ -16,13 +16,14 @@
         onSnapshot,
         query,
         serverTimestamp,
-        setDoc,
+        setDoc, updateDoc,
         where
     } from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {writable} from "svelte/store";
     import {authUser} from '$lib/stores/authUser.js'
+    import {SearchSolid, TrashBinSolid, CirclePlusSolid} from "flowbite-svelte-icons";
     let tuks = writable([]);
     let createForm = false;
     let isCreating = false;
@@ -34,8 +35,8 @@
     onMount(async () => {
         const firebaseUser = $authUser.user
         const q = firebaseUser?.isAdmin ?
-            collection(db, "tuktuks") :
-            query(collection(db, "tuktuks"), where("organizationRef", "==", firebaseUser?.organizationRef))
+            query(collection(db, "tuktuks"), where("disabled", "==", false)) :
+            query(collection(db, "tuktuks"), where("organizationRef", "==", firebaseUser?.organizationRef), where("disabled", "==", false))
         const unsubscribe = onSnapshot(q, (snapshot) => {
             tuks.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
@@ -54,6 +55,24 @@
         licensePlate = event.target.value.toUpperCase()
     }
 
+    let isConfirmOpen = false;
+    let selectedTukId = null;
+
+    function openConfirmDialog(tukId) {
+        selectedTukId = tukId;
+        isConfirmOpen = true;
+    }
+
+    async function disableTuk()
+    {
+        if (selectedTukId) {
+            await updateDoc(doc(db, "tuktuks", selectedTukId), { disabled: true})
+            console.log(`Set disabled tuk: ${selectedTukId}`);
+        }
+        selectedTukId = null;
+        isConfirmOpen = false;
+    }
+
     async function addTuk() {
         isCreating = true
 
@@ -67,6 +86,7 @@
             electric: isElectric,
             seats: parseInt(seats),
             organizationRef: $authUser.user.organizationRef,
+            disabled: false,
             creationDate: serverTimestamp()
         });
 
@@ -79,7 +99,7 @@
     <caption class="p-5 text-lg font-semibold w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
         <div class="flex justify-between items-center w-full">
             <span>Tuks</span>
-            <Button pill color="light" on:click={() => createForm = true}>Add</Button>
+            <Button pill color="light" on:click={() => createForm = true}><CirclePlusSolid class="mr-2" />Add</Button>
         </div>
     </caption>
     <TableHead>
@@ -96,12 +116,23 @@
                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                 <TableBodyCell>{tuk.seats}</TableBodyCell>
                 <TableBodyCell>{tuk.electric}</TableBodyCell>
-                <TableBodyCell>
-                    <a href="/tuks/{tuk.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
+                <TableBodyCell class="flex items-center space-x-4">
+                    <a href="/tuks/{tuk.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
+                    <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"
+                            onclick={() => { openConfirmDialog(tuk.id) }}>
+                        <TrashBinSolid />
+                    </button>
                 </TableBodyCell>
             </TableBodyRow>
         {/each}
     </TableBody>
+    <Modal title="Apagar Tuk" bind:open={isConfirmOpen} autoclose={false}>
+        <p class="text-base text-gray-600">Tem a certeza que quer apagar este Tuk?</p>
+        <svelte:fragment slot="footer">
+            <button class="bg-red-600 text-white px-4 py-2 rounded" onclick={disableTuk}>Sim</button>
+            <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded" onclick={() => isConfirmOpen = false}>Não</button>
+        </svelte:fragment>
+    </Modal>
     <Modal title="Novo Tuk" bind:open={createForm} autoclose={!createForm}>
         <div class="mb-6">
             <Label for="input-group-1" class="block mb-2">Matricula</Label>
