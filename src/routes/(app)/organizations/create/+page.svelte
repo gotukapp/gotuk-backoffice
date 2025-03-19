@@ -9,6 +9,9 @@
     let name = ''
     let vat = ''
     let address = ''
+    let contactName = ''
+    let phone = ''
+    let email = ''
     let vatError = false
 
     onMount(() => {
@@ -47,6 +50,9 @@
                 address: address,
                 vat: vat,
                 name: name,
+                contactName: contactName,
+                email: email,
+                phone: phone,
                 orgCode: generateRandomCode(),
                 creationDate: serverTimestamp()
             });
@@ -81,6 +87,24 @@
                         <Label for="input-group-1" class="block mb-2">Morada</Label>
                         <Input id="name" bind:value={address} required oninvalid={validateField}/>
                     </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Nome do Responsável</Label>
+                        <Input id="name" bind:value={contactName} required oninvalid={validateField}/>
+                    </div>
+                    <div class="row">
+                        <div class="mb-6" style="float: left; width: 40%">
+                            <Label for="input-group-1" class="block mb-2">Telefone</Label>
+                            <div class="flex items-center space-x-2">
+                                <Input type="number" id="name" bind:value={phone} required maxlength="12"/>
+                            </div>
+                        </div>
+                        <div class="mb-6" style="float: right; width: 40%; margin-left: 5%">
+                            <Label for="input-group-1" class="block mb-2">Email</Label>
+                            <div class="flex items-center space-x-2">
+                                <Input type="email" id="name" bind:value={email} required title="Formato de email inválido." />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <Button type="submit">Submeter</Button>
             </form>
@@ -93,5 +117,10 @@
         color: #eee;
         height: 2px;
         margin-bottom: 10px;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
     }
 </style>

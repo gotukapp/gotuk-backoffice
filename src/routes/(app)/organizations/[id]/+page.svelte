@@ -34,18 +34,27 @@
 
     let document = $state(null);
 
+    let workAccidentInsuranceData = $state(null);
+    let workAccidentInsuranceFiles = $state([]);
+    let unsubscribeWorkAccidentDocuments;
     let editingAccidentInsurance = $state(false)
     let insuranceWorkAccidentExpirationDate = $state("")
     let insuranceWorkAccidentCompanyName = $state("")
     let insuranceWorkAccidentPolicyNumber = $state("")
+    let fileInput = $state(null)
+    let selectedFiles =  $state([])
+    let localPreviews = $state([])
+
+    let civilLiabilityInsuranceData = $state(null);
+    let civilLiabilityInsuranceFiles = $state([]);
+    let unsubscribeCivilLiabilityDocuments;
     let editingCivilLiabilityInsurance = $state(false)
     let insuranceCivilLiabilityExpirationDate = $state("")
     let insuranceCivilLiabilityCompanyName = $state("")
     let insuranceCivilLiabilityPolicyNumber = $state("")
-    let fileInput = $state(null)
-    let selectedFiles =  $state([])
-    let localPreviews = $state([])
-    let uploadedUrls = $state([])
+
+
+
     let uploadProgress = $state(0)
     let isUploading = $state(false)
 
@@ -53,13 +62,7 @@
     let error = $state(null);
     let tuks = writable([]);
     let users = writable([]);
-    let unsubscribeWorkAccidentDocuments;
-    let unsubscribeCivilLiabilityDocuments;
     let orgDocuments = writable(null);
-    let workAccidentInsuranceData = $state(null);
-    let civilLiabilityInsuranceData = $state(null);
-    let workAccidentInsuranceFiles = $state([]);
-    let civilLiabilityInsuranceFiles = $state([]);
 
     onMount(() => {
         try {
@@ -195,17 +198,41 @@
                     <Label for="input-group-1" class="block mb-2">Code</Label>
                     <div id="insurance-company" class="readonly-input">{document?.orgCode}</div>
                 </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Name</Label>
-                    <div id="insurance-company" class="readonly-input">{document?.name}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">VAT</Label>
-                    <div id="insurance-company" class="readonly-input">{document?.vat}</div>
+                <div class="row">
+                    <div class="mb-6" style="float: left; width: 70%">
+                        <Label for="input-group-1" class="block mb-2">Name</Label>
+                        <div class="flex items-center space-x-2">
+                            <div id="insurance-company" class="readonly-input">{document?.name}</div>
+                        </div>
+                    </div>
+                    <div class="mb-6" style="float: right; width: 20%; margin-left: 5%">
+                        <Label for="input-group-1" class="block mb-2">VAT</Label>
+                        <div class="flex items-center space-x-2">
+                            <div id="insurance-company" class="readonly-input">{document?.vat}</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Address</Label>
                     <div id="insurance-company" class="readonly-input">{document?.address}</div>
+                </div>
+                <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Contact Name</Label>
+                    <div id="insurance-company" class="readonly-input">{document?.contactName}</div>
+                </div>
+                <div class="row">
+                    <div class="mb-6" style="float: left; width: 40%">
+                        <Label for="input-group-1" class="block mb-2">Phone</Label>
+                        <div class="flex items-center space-x-2">
+                            <div id="insurance-company" class="readonly-input">{document?.phone}</div>
+                        </div>
+                    </div>
+                    <div class="mb-6" style="float: right; width: 40%; margin-left: 5%">
+                        <Label for="input-group-1" class="block mb-2">Email</Label>
+                        <div class="flex items-center space-x-2">
+                            <div id="insurance-company" class="readonly-input">{document?.email}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </Card>
@@ -257,7 +284,7 @@
                                 {#each civilLiabilityInsuranceFiles as file}
                                     <div class="relative w-20 h-20 previewImage">
                                         <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Selected Image" class="w-full h-full object-cover rounded-md" />
+                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
                                         </a>
                                     </div>
                                 {/each}
@@ -293,7 +320,7 @@
                                             {#each localPreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
-                                                    <img src={preview} alt="Selected Image" class="w-full h-full object-cover rounded-md" />
+                                                    <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(index)}} >
                                                         ✕
                                                     </button>
@@ -343,7 +370,7 @@
                                 {#each workAccidentInsuranceFiles as file}
                                     <div class="relative w-20 h-20 previewImage">
                                         <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Selected Image" class="w-full h-full object-cover rounded-md" />
+                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
                                         </a>
                                     </div>
                                 {/each}
@@ -377,7 +404,7 @@
                                             {#each localPreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
-                                                    <img src={preview} alt="Selected Image" class="w-full h-full object-cover rounded-md" />
+                                                    <img alt="Document" class="w-full h-full object-cover rounded-md" src={preview} />
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(index)}} >
                                                         ✕
                                                     </button>
@@ -480,5 +507,10 @@
         background-color: #f9f9f9;
         border: 1px solid #ddd;
         border-radius: 5px;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
     }
 </style>
