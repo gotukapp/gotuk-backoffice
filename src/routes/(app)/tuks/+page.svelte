@@ -99,7 +99,9 @@
     <caption class="p-5 text-lg font-semibold w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
         <div class="flex justify-between items-center w-full">
             <span>Tuks</span>
-            <Button pill color="light" on:click={() => createForm = true}><CirclePlusSolid class="mr-2" />Add</Button>
+            {#if !$authUser.isAdmin}
+                <Button pill color="light" on:click={() => createForm = true}><CirclePlusSolid class="mr-2" />Add</Button>
+            {/if}
         </div>
     </caption>
     <TableHead>
