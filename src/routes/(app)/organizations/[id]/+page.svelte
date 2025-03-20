@@ -34,6 +34,23 @@
 
     let document = $state(null);
 
+    let activityCertificateFiles = $state([]);
+    let activityCertificateData = $state(null);
+    let editingActivityCertificate = $state(false);
+    let fileActivityCertificateInput = $state(null)
+    let selectedActivityCertificateFiles =  $state([])
+    let localActivityCertificatePreviews = $state([])
+    let unsubscribeActivityCertificateDocuments;
+
+    let licenseRNAATFiles = $state([]);
+    let licenseRNAATData = $state(null);
+    let editingLicenseRNAAT = $state(false);
+    let licenseRNAATNumber = $state('');
+    let fileLicenseRNAATInput = $state(null)
+    let selectedLicenseRNAATFiles =  $state([])
+    let localLicenseRNAATPreviews = $state([])
+    let unsubscribeLicenseRNAATDocuments;
+
     let workAccidentInsuranceData = $state(null);
     let workAccidentInsuranceFiles = $state([]);
     let unsubscribeWorkAccidentDocuments;
@@ -52,8 +69,20 @@
     let insuranceCivilLiabilityExpirationDate = $state("")
     let insuranceCivilLiabilityCompanyName = $state("")
     let insuranceCivilLiabilityPolicyNumber = $state("")
+    let fileCivilLiabilityInsuranceInput = $state(null)
+    let selectedCivilLiabilityInsuranceFiles =  $state([])
+    let localCivilLiabilityInsurancePreviews = $state([])
 
-
+    let personalInsuranceData = $state(null);
+    let personalInsuranceFiles = $state([]);
+    let unsubscribePersonalDocuments;
+    let editingPersonalInsurance = $state(false)
+    let insurancePersonalExpirationDate = $state("")
+    let insurancePersonalCompanyName = $state("")
+    let insurancePersonalPolicyNumber = $state("")
+    let filePersonalInsuranceInput = $state(null)
+    let selectedPersonalInsuranceFiles =  $state([])
+    let localPersonalInsurancePreviews = $state([])
 
     let uploadProgress = $state(0)
     let isUploading = $state(false)
@@ -62,7 +91,6 @@
     let error = $state(null);
     let tuks = writable([]);
     let users = writable([]);
-    let orgDocuments = writable(null);
 
     onMount(() => {
         try {
@@ -74,6 +102,24 @@
             const unsubscribeOrg = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     document = docSnap.data();
+
+                    const documentsActivityCertificateRef = collection(doc(db, "organizations", id), "activityCertificate");
+                    const queryActivityCertificateDocuments = query(documentsActivityCertificateRef, orderBy("submitDate", "desc"), limit(1));
+                    unsubscribeActivityCertificateDocuments = onSnapshot(queryActivityCertificateDocuments, async (querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            activityCertificateData = querySnapshot.docs[0].data();
+                            activityCertificateFiles = await getAllFilesFromFolder(`uploads/organizations/${$page.params.id}/activityCertificate/${querySnapshot.docs[0].id}`)
+                        }
+                    })
+
+                    const documentsLicenseRNAATRef = collection(doc(db, "organizations", id), "licenseRNAAT");
+                    const queryLicenseRNAATDocuments = query(documentsLicenseRNAATRef, orderBy("submitDate", "desc"), limit(1));
+                    unsubscribeLicenseRNAATDocuments = onSnapshot(queryLicenseRNAATDocuments, async (querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            licenseRNAATData = querySnapshot.docs[0].data();
+                            licenseRNAATFiles = await getAllFilesFromFolder(`uploads/organizations/${$page.params.id}/licenseRNAAT/${querySnapshot.docs[0].id}`)
+                        }
+                    })
 
                     const documentsRef = collection(doc(db, "organizations", id), "workAccidentInsurance");
                     const queryDocuments = query(documentsRef, orderBy("submitDate", "desc"), limit(1));
@@ -90,6 +136,15 @@
                         if (!querySnapshot.empty) {
                             civilLiabilityInsuranceData = querySnapshot.docs[0].data();
                             civilLiabilityInsuranceFiles = await getAllFilesFromFolder(`uploads/organizations/${$page.params.id}/civilLiabilityInsurance/${querySnapshot.docs[0].id}`)
+                        }
+                    })
+
+                    const personalInsuranceDocumentsRef = collection(doc(db, "organizations", id), "personalAccidentInsurance");
+                    const personalInsuranceQueryDocuments = query(personalInsuranceDocumentsRef, orderBy("submitDate", "desc"), limit(1));
+                    unsubscribePersonalDocuments = onSnapshot(personalInsuranceQueryDocuments, async (querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            personalInsuranceData = querySnapshot.docs[0].data();
+                            personalInsuranceFiles = await getAllFilesFromFolder(`uploads/organizations/${$page.params.id}/personalAccidentInsurance/${querySnapshot.docs[0].id}`)
                         }
                     })
 
@@ -119,14 +174,20 @@
                     unsubscribeTuks();
                     unsubscribeUsers();
 
+                    unsubscribeActivityCertificateDocuments();
+                    unsubscribeLicenseRNAATDocuments();
                     unsubscribeWorkAccidentDocuments();
                     unsubscribeCivilLiabilityDocuments();
+                    unsubscribePersonalDocuments();
                 };
             } else {
                 return () => {
                     unsubscribeOrg();
+                    unsubscribeActivityCertificateDocuments();
+                    unsubscribeLicenseRNAATDocuments();
                     unsubscribeWorkAccidentDocuments();
                     unsubscribeCivilLiabilityDocuments();
+                    unsubscribePersonalDocuments();
                 };
             }
         } catch (e) {
@@ -146,20 +207,92 @@
         localPreviews = selectedFiles.map(file => URL.createObjectURL(file))
     }
 
+    function removeCivilLiabilityInsuranceImage(index) {
+        selectedCivilLiabilityInsuranceFiles.splice(index, 1)
+        localCivilLiabilityInsurancePreviews.splice(index, 1)
+    }
+
+    function selectCivilLiabilityInsuranceFiles(event) {
+        selectedCivilLiabilityInsuranceFiles.push(...Array.from(event.target.files))
+        localCivilLiabilityInsurancePreviews = selectedCivilLiabilityInsuranceFiles.map(file => URL.createObjectURL(file))
+    }
+
+    function removePersonalInsuranceImage(index) {
+        selectedPersonalInsuranceFiles.splice(index, 1)
+        localPersonalInsurancePreviews.splice(index, 1)
+    }
+
+    function selectPersonalInsuranceFiles(event) {
+        selectedPersonalInsuranceFiles.push(...Array.from(event.target.files))
+        localPersonalInsurancePreviews = selectedPersonalInsuranceFiles.map(file => URL.createObjectURL(file))
+    }
+
+    function removeActivityCertificateImage(index) {
+        selectedActivityCertificateFiles.splice(index, 1)
+        localActivityCertificatePreviews.splice(index, 1)
+    }
+
+    function selectActivityCertificateFiles(event) {
+        selectedActivityCertificateFiles.push(...Array.from(event.target.files))
+        localActivityCertificatePreviews = selectedActivityCertificateFiles.map(file => URL.createObjectURL(file))
+    }
+
+    async function submitActivityCertificate() {
+        isUploading = true
+        const docRef = doc(collection(doc(db, "organizations", $page.params.id), "activityCertificate"))
+        await uploadImages(`uploads/organizations/${$page.params.id}/activityCertificate/${docRef.id}`, selectedActivityCertificateFiles, uploadProgress);
+        await setDoc(docRef, {
+            status: 'pending',
+            submitDate: serverTimestamp()
+        });
+
+        isUploading = false
+        editingActivityCertificate = false;
+    }
+
+    function removeLicenseRNAATImage(index) {
+        selectedLicenseRNAATFiles.splice(index, 1)
+        localLicenseRNAATPreviews.splice(index, 1)
+    }
+
+    function selectLicenseRNAATFiles(event) {
+        selectedLicenseRNAATFiles.push(...Array.from(event.target.files))
+        localLicenseRNAATPreviews = selectedLicenseRNAATFiles.map(file => URL.createObjectURL(file))
+    }
+
+    async function submitLicenseRNAAT() {
+        isUploading = true
+        const docRef = doc(collection(doc(db, "organizations", $page.params.id), "licenseRNAAT"))
+        await uploadImages(`uploads/organizations/${$page.params.id}/licenseRNAAT/${docRef.id}`, selectedLicenseRNAATFiles, uploadProgress);
+        await setDoc(docRef, {
+            number: licenseRNAATNumber,
+            status: 'pending',
+            submitDate: serverTimestamp()
+        });
+
+        isUploading = false
+        editingLicenseRNAAT = false;
+    }
+
     async function submitWorkAccidentInsurance() {
-        await submit("workAccidentInsurance", insuranceWorkAccidentCompanyName, insuranceWorkAccidentPolicyNumber, insuranceWorkAccidentExpirationDate)
+        await submit("workAccidentInsurance", insuranceWorkAccidentCompanyName, insuranceWorkAccidentPolicyNumber, insuranceWorkAccidentExpirationDate, selectedFiles)
         editingAccidentInsurance = false;
     }
 
     async function submitCivilLiabilityInsurance() {
-        await submit("civilLiabilityInsurance", insuranceCivilLiabilityCompanyName, insuranceCivilLiabilityPolicyNumber, insuranceCivilLiabilityExpirationDate)
+        await submit("civilLiabilityInsurance", insuranceCivilLiabilityCompanyName, insuranceCivilLiabilityPolicyNumber, insuranceCivilLiabilityExpirationDate, selectedCivilLiabilityInsuranceFiles)
         editingCivilLiabilityInsurance = false;
     }
 
-    async function submit(documentType, name, number, expirationDate) {
+    async function submitPersonalInsurance() {
+        await submit("personalAccidentInsurance", insurancePersonalCompanyName, insurancePersonalPolicyNumber, insurancePersonalExpirationDate, selectedPersonalInsuranceFiles)
+        editingPersonalInsurance = false;
+    }
+
+    async function submit(documentType, name, number, expirationDate, files) {
         isUploading = true
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), documentType))
-        await uploadImages(`uploads/organizations/${$page.params.id}/${documentType}/${docRef.id}`, selectedFiles, uploadProgress);
+        await uploadImages(`uploads/organizations/${$page.params.id}/${documentType}/${docRef.id}`, files, uploadProgress);
         await setDoc(docRef, {
             name: name,
             number: number,
@@ -239,30 +372,134 @@
         <Card size="xl" style="margin-top: 20px">
             <Accordion style="margin-top: 20px; margin-bottom: 20px">
                 <AccordionItem>
-                    {#if orgDocuments?.activityProof}
-                        <Badge large color={getStatusColor(orgDocuments?.activityProof)}>{orgDocuments?.activityProof.toUpperCase()}</Badge>
+                    {#if activityCertificateData?.status}
+                        <div class="mb-6">
+                            <Badge large color={getStatusColor(activityCertificateData?.status)}>{activityCertificateData?.status.toUpperCase()}</Badge>
+                        </div>
                     {/if}
                     <span slot="header">Comprovativo de Actividade ou Certidão Permanente</span>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                        {#if activityCertificateFiles.length > 0}
+                            <div class="flex gap-2 mt-2">
+                                {#each activityCertificateFiles as file}
+                                    <div class="relative w-20 h-20 mr-5">
+                                        <a href={file} target="_blank" rel="noopener noreferrer">
+                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        </a>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
                     {#if $authUser.isAdmin}
-                        <Button pill color="blue" on:click={() => approve("activityProof")}>Aprovar</Button>
+                        <Button pill color="blue" on:click={() => approve("activityCertificate")}>Aprovar</Button>
+                    {/if}
+                    {#if !$authUser.isAdmin}
+                        <div>
+                            <Button pill color="light" on:click={() => editingActivityCertificate = true}>Novo</Button>
+                            <Modal title="Comprovativo de Actividade ou Certidão Permanente" bind:open={editingActivityCertificate} autoclose={!isUploading}>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                                    <input type="file" accept="image/*" bind:this={fileActivityCertificateInput} multiple onchange={selectActivityCertificateFiles} style="display: none" />
+                                    {#if localActivityCertificatePreviews.length > 0}
+                                        <div class="flex gap-2 mt-2">
+                                            {#each localActivityCertificatePreviews as preview, index}
+                                                <div class="relative w-20 h-20 previewImage">
+                                                    <!-- Image Preview -->
+                                                    <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeActivityCertificateImage(index)}} >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                </div>
+                                <Button color="blue" on:click={(event) => { event.stopPropagation(); openFilePicker(fileActivityCertificateInput); }}>
+                                    Adicionar
+                                </Button>
+                                <svelte:fragment slot="footer">
+                                    <Button on:click={() => submitActivityCertificate()}>Submeter</Button>
+                                    {#if isUploading}
+                                        <p>Uploading... {uploadProgress.toFixed(0)}%</p>
+                                    {/if}
+                                </svelte:fragment>
+                            </Modal>
+                        </div>
                     {/if}
                 </AccordionItem>
                 <AccordionItem>
-                    {#if orgDocuments?.licenseRNAAT}
-                        <Badge large color={getStatusColor(orgDocuments?.licenseRNAAT)}>{orgDocuments?.licenseRNAAT.toUpperCase()}</Badge>
+                    {#if licenseRNAATData?.status}
+                        <div class="mb-6">
+                            <Badge large color={getStatusColor(licenseRNAATData?.status)}>{licenseRNAATData?.status.toUpperCase()}</Badge>
+                        </div>
                     {/if}
                     <span slot="header">Licença RNAAT</span>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Nº Registo</Label>
-                        <div id="insurance-company" class="readonly-input">{orgDocuments.licenseRNAATNumber}</div>
+                        <div id="insurance-company" class="readonly-input">{licenseRNAATData?.number}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                        {#if licenseRNAATFiles.length > 0}
+                            <div class="flex gap-2 mt-2">
+                                {#each licenseRNAATFiles as file}
+                                    <div class="relative w-20 h-20 mr-5">
+                                        <a href={file} target="_blank" rel="noopener noreferrer">
+                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        </a>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
                     </div>
                     {#if $authUser.isAdmin}
                         <Button pill color="light" on:click={() => approve("licenseRNAAT")}>Aprovar</Button>
                     {/if}
+                    {#if !$authUser.isAdmin}
+                        <div>
+                            <Button pill color="light" on:click={() => editingLicenseRNAAT = true}>Novo</Button>
+                            <Modal title="Licença RNAAT" bind:open={editingLicenseRNAAT} autoclose={!isUploading}>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Nº Registo</Label>
+                                    <Input id="companyName" bind:value={licenseRNAATNumber}/>
+                                </div>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                                    <input type="file" accept="image/*" bind:this={fileLicenseRNAATInput} multiple onchange={selectLicenseRNAATFiles} style="display: none" />
+                                    {#if localLicenseRNAATPreviews.length > 0}
+                                        <div class="flex gap-2 mt-2">
+                                            {#each localLicenseRNAATPreviews as preview, index}
+                                                <div class="relative w-20 h-20 previewImage">
+                                                    <!-- Image Preview -->
+                                                    <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeLicenseRNAATImage(index)}} >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                </div>
+                                <Button color="blue" on:click={(event) => { event.stopPropagation(); openFilePicker(fileLicenseRNAATInput); }}>
+                                    Adicionar
+                                </Button>
+                                <svelte:fragment slot="footer">
+                                    <Button on:click={() => submitLicenseRNAAT()}>Submeter</Button>
+                                    {#if isUploading}
+                                        <p>Uploading... {uploadProgress.toFixed(0)}%</p>
+                                    {/if}
+                                </svelte:fragment>
+                            </Modal>
+                        </div>
+                    {/if}
                 </AccordionItem>
                 <AccordionItem>
                     {#if civilLiabilityInsuranceData?.status}
-                        <Badge large color={getStatusColor(civilLiabilityInsuranceData?.status)}>{civilLiabilityInsuranceData?.status.toUpperCase()}</Badge>
+                        <div class="mb-6">
+                            <Badge large color={getStatusColor(civilLiabilityInsuranceData?.status)}>{civilLiabilityInsuranceData?.status.toUpperCase()}</Badge>
+                        </div>
                     {/if}
                     <span slot="header">Apólice de Seguro de Responsabilidade Civil</span>
                     <div class="mb-6">
@@ -282,7 +519,7 @@
                         {#if civilLiabilityInsuranceFiles.length > 0}
                             <div class="flex gap-2 mt-2">
                                 {#each civilLiabilityInsuranceFiles as file}
-                                    <div class="relative w-20 h-20 previewImage">
+                                    <div class="relative w-20 h-20 mr-5">
                                         <a href={file} target="_blank" rel="noopener noreferrer">
                                             <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
                                         </a>
@@ -314,14 +551,14 @@
                                     <Label for="input-group-1" class="block mb-2">Documentos</Label>
                                     <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Condições da Apolice</span></Helper>
                                     <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Recibo de Pagamento</span></Helper>
-                                    <input type="file" accept="image/*" bind:this={fileInput} multiple onchange={selectFiles} style="display: none" />
-                                    {#if localPreviews.length > 0}
+                                    <input type="file" accept="image/*" bind:this={fileCivilLiabilityInsuranceInput} multiple onchange={selectCivilLiabilityInsuranceFiles} style="display: none" />
+                                    {#if localCivilLiabilityInsurancePreviews.length > 0}
                                         <div class="flex gap-2 mt-2">
-                                            {#each localPreviews as preview, index}
+                                            {#each localCivilLiabilityInsurancePreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
                                                     <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(index)}} >
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeCivilLiabilityInsuranceImage(index)}} >
                                                         ✕
                                                     </button>
                                                 </div>
@@ -329,7 +566,7 @@
                                         </div>
                                     {/if}
                                 </div>
-                                <Button color="blue" on:click={(event) => { event.stopPropagation(); openFilePicker(fileInput); }}>
+                                <Button color="blue" on:click={(event) => { event.stopPropagation(); openFilePicker(fileCivilLiabilityInsuranceInput); }}>
                                     Adicionar
                                 </Button>
                                 <svelte:fragment slot="footer">
@@ -353,11 +590,11 @@
                     {/if}
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                        <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData.name}</div>
+                        <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.name}</div>
                     </div>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                        <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData.number}</div>
+                        <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.number}</div>
                     </div>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
@@ -368,7 +605,7 @@
                         {#if workAccidentInsuranceFiles.length > 0}
                             <div class="flex gap-2 mt-2">
                                 {#each workAccidentInsuranceFiles as file}
-                                    <div class="relative w-20 h-20 previewImage">
+                                    <div class="relative w-20 h-20 mr-5">
                                         <a href={file} target="_blank" rel="noopener noreferrer">
                                             <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
                                         </a>
@@ -398,6 +635,8 @@
                                 </div>
                                 <div class="mb-6">
                                     <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                                    <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Condições da Apolice</span></Helper>
+                                    <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Recibo de Pagamento</span></Helper>
                                     <input type="file" accept="image/*" bind:this={fileInput} multiple onchange={selectFiles} style="display: none" />
                                     {#if localPreviews.length > 0}
                                         <div class="flex gap-2 mt-2">
@@ -418,6 +657,90 @@
                                 </Button>
                                 <svelte:fragment slot="footer">
                                     <Button on:click={() => submitWorkAccidentInsurance()}>Submeter</Button>
+                                    {#if isUploading}
+                                        <p>Uploading... {uploadProgress.toFixed(0)}%</p>
+                                    {/if}
+                                </svelte:fragment>
+                            </Modal>
+                        </div>
+                    {/if}
+                </AccordionItem>
+                <AccordionItem>
+                    <span slot="header">Apólice de Seguro de Acidentes Pessoais</span>
+                    {#if personalInsuranceData?.status}
+                        <div class="mb-6">
+                            <Badge large color={getStatusColor(personalInsuranceData?.status)}>{personalInsuranceData?.status.toUpperCase()}</Badge>
+                        </div>
+                    {/if}
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
+                        <div id="insurance-company" class="readonly-input">{personalInsuranceData?.name}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
+                        <div id="insurance-company" class="readonly-input">{personalInsuranceData?.number}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
+                        <div id="insurance-company" class="readonly-input">{formatDate(personalInsuranceData?.expirationDate)}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                        {#if personalInsuranceFiles.length > 0}
+                            <div class="flex gap-2 mt-2">
+                                {#each personalInsuranceFiles as file}
+                                    <div class="relative w-20 h-20 mr-5">
+                                        <a href={file} target="_blank" rel="noopener noreferrer">
+                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        </a>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                    {#if $authUser.isAdmin}
+                        <Button pill color="light" on:click={() => approve("personalAccidentInsurance")}>Aprovar</Button>
+                    {/if}
+                    {#if !$authUser.isAdmin}
+                        <div>
+                            <Button pill color="light" on:click={() => editingPersonalInsurance = true}>Novo</Button>
+                            <Modal title="Apólice de Seguro de Acidentes de Trabalho" bind:open={editingPersonalInsurance} autoclose={!isUploading}>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
+                                    <Input id="companyName" bind:value={insurancePersonalCompanyName}/>
+                                </div>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
+                                    <Input id="policyNumber" bind:value={insurancePersonalPolicyNumber}/>
+                                </div>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
+                                    <Input id="expirationDate" type="date" bind:value={insurancePersonalExpirationDate}/>
+                                </div>
+                                <div class="mb-6">
+                                    <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                                    <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Condições da Apolice</span></Helper>
+                                    <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Recibo de Pagamento</span></Helper>
+                                    <input type="file" accept="image/*" bind:this={filePersonalInsuranceInput} multiple onchange={selectPersonalInsuranceFiles} style="display: none" />
+                                    {#if localPersonalInsurancePreviews.length > 0}
+                                        <div class="flex gap-2 mt-2">
+                                            {#each localPersonalInsurancePreviews as preview, index}
+                                                <div class="relative w-20 h-20 previewImage">
+                                                    <!-- Image Preview -->
+                                                    <img alt="Document" class="w-full h-full object-cover rounded-md" src={preview} />
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removePersonalInsuranceImage(index)}} >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                </div>
+                                <Button color="blue" on:click={(event) => { event.stopPropagation(); openFilePicker(filePersonalInsuranceInput); }}>
+                                    Adicionar
+                                </Button>
+                                <svelte:fragment slot="footer">
+                                    <Button on:click={() => submitPersonalInsurance()}>Submeter</Button>
                                     {#if isUploading}
                                         <p>Uploading... {uploadProgress.toFixed(0)}%</p>
                                     {/if}
