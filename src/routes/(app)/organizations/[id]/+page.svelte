@@ -34,6 +34,12 @@
 
     let document = $state(null);
 
+    let editingContacts = $state(false);
+    let contactName = $state('');
+    let address = $state('');
+    let phone = $state('');
+    let email = $state('');
+
     let activityCertificateFiles = $state([]);
     let activityCertificateData = $state(null);
     let editingActivityCertificate = $state(false);
@@ -237,6 +243,20 @@
         localActivityCertificatePreviews = selectedActivityCertificateFiles.map(file => URL.createObjectURL(file))
     }
 
+    async function submitContacts() {
+        isUploading = true
+        const docRef = doc(db, "organizations", $page.params.id)
+        await updateDoc(docRef, {
+            contactName: contactName,
+            address: address,
+            phone: phone,
+            email: email
+        })
+
+        isUploading = false
+        editingContacts = false;
+    }
+
     async function submitActivityCertificate() {
         isUploading = true
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), "activityCertificate"))
@@ -316,6 +336,14 @@
             console.log("No documents found to approve.");
         }
     }
+
+    function editContacts() {
+        contactName = document?.contactName
+        address = document?.address
+        phone = document?.phone
+        email = document?.email
+        editingContacts = true
+    }
 </script>
 <div class="w-full" style="margin: 20px">
     <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
@@ -327,46 +355,86 @@
     {:else}
         <Card size="xl" style="margin-top: 20px">
             <div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Code</Label>
+                <div class="mb-4">
+                    <Label for="input-group-1" class="block mb-2">Código</Label>
                     <div id="insurance-company" class="readonly-input">{document?.orgCode}</div>
                 </div>
                 <div class="row">
-                    <div class="mb-6" style="float: left; width: 70%">
-                        <Label for="input-group-1" class="block mb-2">Name</Label>
+                    <div class="mb-4" style="float: left; width: 70%">
+                        <Label for="input-group-1" class="block mb-2">Nome</Label>
                         <div class="flex items-center space-x-2">
                             <div id="insurance-company" class="readonly-input">{document?.name}</div>
                         </div>
                     </div>
-                    <div class="mb-6" style="float: right; width: 20%; margin-left: 5%">
-                        <Label for="input-group-1" class="block mb-2">VAT</Label>
+                    <div class="mb-4" style="float: right; width: 20%; margin-left: 5%">
+                        <Label for="input-group-1" class="block mb-2">NIF</Label>
                         <div class="flex items-center space-x-2">
                             <div id="insurance-company" class="readonly-input">{document?.vat}</div>
                         </div>
                     </div>
                 </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Address</Label>
-                    <div id="insurance-company" class="readonly-input">{document?.address}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Contact Name</Label>
-                    <div id="insurance-company" class="readonly-input">{document?.contactName}</div>
-                </div>
-                <div class="row">
-                    <div class="mb-6" style="float: left; width: 40%">
-                        <Label for="input-group-1" class="block mb-2">Phone</Label>
-                        <div class="flex items-center space-x-2">
-                            <div id="insurance-company" class="readonly-input">{document?.phone}</div>
+                <section class="relative p-4 border border-gray-300 rounded-lg mt-4">
+                    <h2 class="absolute top-0 left-4 -translate-y-1/2 bg-white px-2 text-lg font-semibold">
+                        Contactos
+                    </h2>
+                    <div class="mb-4 mt-4">
+                        <Label for="input-group-1" class="block mb-2">Nome de Contacto</Label>
+                        <div id="insurance-company" class="readonly-input">{document?.contactName}</div>
+                    </div>
+                    <div class="mb-4">
+                        <Label for="input-group-1" class="block mb-2">Morada</Label>
+                        <div id="insurance-company" class="readonly-input">{document?.address}</div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-4" style="float: left; width: 40%">
+                            <Label for="input-group-1" class="block mb-2">Telefone</Label>
+                            <div class="flex items-center space-x-2">
+                                <div id="insurance-company" class="readonly-input">{document?.phone}</div>
+                            </div>
+                        </div>
+                        <div class="mb-4" style="float: right; width: 40%; margin-left: 5%">
+                            <Label for="input-group-1" class="block mb-2">Email</Label>
+                            <div class="flex items-center space-x-2">
+                                <div id="insurance-company" class="readonly-input">{document?.email}</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-6" style="float: right; width: 40%; margin-left: 5%">
-                        <Label for="input-group-1" class="block mb-2">Email</Label>
-                        <div class="flex items-center space-x-2">
-                            <div id="insurance-company" class="readonly-input">{document?.email}</div>
+                    {#if !$authUser.isAdmin}
+                        <hr class="mb-3" />
+                        <div>
+                            <Button pill color="light" on:click={editContacts}>Editar</Button>
+                            <Modal title="Contactos" bind:open={editingContacts} autoclose={!isUploading}>
+                                <div>
+                                    <div class="mb-4">
+                                        <Label for="input-group-1" class="block mb-2">Nome do Responsável</Label>
+                                        <Input id="name" bind:value={contactName}/>
+                                    </div>
+                                    <div class="mb-4">
+                                        <Label for="input-group-1" class="block mb-2">Morada</Label>
+                                        <Input id="name" bind:value={address}/>
+                                    </div>
+                                    <div class="row">
+                                        <div class="mb-4" style="float: left; width: 40%">
+                                            <Label for="input-group-1" class="block mb-2">Telefone</Label>
+                                            <div class="flex items-center space-x-2">
+                                                <Input type="number" id="name" bind:value={phone} maxlength="12"/>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4" style="float: right; width: 40%; margin-left: 5%">
+                                            <Label for="input-group-1" class="block mb-2">Email</Label>
+                                            <div class="flex items-center space-x-2">
+                                                <Input type="email" id="name" bind:value={email} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <svelte:fragment slot="footer">
+                                    <Button on:click={() => submitContacts()}>{#if isUploading}<Spinner />{/if}Gravar</Button>
+                                </svelte:fragment>
+                            </Modal>
                         </div>
-                    </div>
-                </div>
+                    {/if}
+                </section>
             </div>
         </Card>
         <Card size="xl" style="margin-top: 20px">

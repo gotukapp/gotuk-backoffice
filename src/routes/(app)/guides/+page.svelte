@@ -65,7 +65,7 @@
                 <TableBodyCell>{user.phone}</TableBodyCell>
                 <TableBodyCell>{user.accountValidated ? "Valid" : "Blocked"}</TableBodyCell>
                 <TableBodyCell>{user.rating}</TableBodyCell>
-                <TableBodyCell>
+                <TableBodyCell class="flex items-center space-x-4">
                     <a href="/guides/{user.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                     <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"
                             onclick={() => { openConfirmDialog(user.id) }}>

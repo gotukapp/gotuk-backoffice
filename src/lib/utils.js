@@ -2,11 +2,9 @@ import {getDownloadURL, listAll, ref, uploadBytes} from "firebase/storage";
 import {storage} from "./index.js";
 
 export async function getAllFilesFromFolder(folderPath) {
-    console.log(folderPath)
     const folderRef = ref(storage, folderPath)
     try {
         const result = await listAll(folderRef)
-        console.log(result)
         return await Promise.all(result.items.map(async (fileRef) => {
             return getDownloadURL(fileRef) // Get each file's URL
         }))
