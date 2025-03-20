@@ -11,7 +11,7 @@
         Table,
         TableHead, TableBodyRow, Badge, Accordion, AccordionItem, Modal, Helper
     } from 'flowbite-svelte';
-    import { ArrowLeftOutline } from 'flowbite-svelte-icons';
+    import { ArrowLeftOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import { db } from '$lib'
     import {
@@ -377,7 +377,12 @@
                             <Badge large color={getStatusColor(activityCertificateData?.status)}>{activityCertificateData?.status.toUpperCase()}</Badge>
                         </div>
                     {/if}
-                    <span slot="header">Comprovativo de Actividade ou Certidão Permanente</span>
+                    <span slot="header" class="flex items-center gap-2">
+                        {#if activityCertificateData?.status === "approved"}
+                            <CheckCircleSolid color="green" />
+                        {/if}
+                        Comprovativo de Actividade ou Certidão Permanente
+                    </span>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Documentos</Label>
                         {#if activityCertificateFiles.length > 0}
@@ -435,7 +440,12 @@
                             <Badge large color={getStatusColor(licenseRNAATData?.status)}>{licenseRNAATData?.status.toUpperCase()}</Badge>
                         </div>
                     {/if}
-                    <span slot="header">Licença RNAAT</span>
+                    <span slot="header" class="flex items-center gap-2">
+                        {#if licenseRNAATData?.status === "approved"}
+                            <CheckCircleSolid color="green" />
+                        {/if}
+                        Licença RNAAT
+                    </span>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Nº Registo</Label>
                         <div id="insurance-company" class="readonly-input">{licenseRNAATData?.number}</div>
@@ -501,7 +511,12 @@
                             <Badge large color={getStatusColor(civilLiabilityInsuranceData?.status)}>{civilLiabilityInsuranceData?.status.toUpperCase()}</Badge>
                         </div>
                     {/if}
-                    <span slot="header">Apólice de Seguro de Responsabilidade Civil</span>
+                    <span slot="header" class="flex items-center gap-2">
+                        {#if civilLiabilityInsuranceData?.status === "approved"}
+                            <CheckCircleSolid color="green" />
+                        {/if}
+                        Apólice de Seguro de Responsabilidade Civil
+                    </span>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
                         <div id="insurance-company" class="readonly-input">{civilLiabilityInsuranceData?.name}</div>
@@ -529,7 +544,7 @@
                         {/if}
                     </div>
                     {#if $authUser.isAdmin}
-                        <Button pill color="light" on:click={() => approve("submitCivilLiabilityInsurance")}>Aprovar</Button>
+                        <Button pill color="light" on:click={() => approve("civilLiabilityInsurance")}>Aprovar</Button>
                     {/if}
                     {#if !$authUser.isAdmin}
                         <div>
@@ -580,7 +595,10 @@
                     {/if}
                 </AccordionItem>
                 <AccordionItem>
-                    <span slot="header">
+                    <span slot="header" class="flex items-center gap-2">
+                        {#if workAccidentInsuranceData?.status === "approved"}
+                            <CheckCircleSolid color="green" />
+                        {/if}
                         Apólice de Seguro de Acidentes de Trabalho
                     </span>
                     {#if workAccidentInsuranceData?.status}
@@ -666,7 +684,12 @@
                     {/if}
                 </AccordionItem>
                 <AccordionItem>
-                    <span slot="header">Apólice de Seguro de Acidentes Pessoais</span>
+                    <span slot="header" class="flex items-center gap-2">
+                        {#if personalInsuranceData?.status === "approved"}
+                            <CheckCircleSolid color="green" />
+                        {/if}
+                        Apólice de Seguro de Acidentes Pessoais
+                    </span>
                     {#if personalInsuranceData?.status}
                         <div class="mb-6">
                             <Badge large color={getStatusColor(personalInsuranceData?.status)}>{personalInsuranceData?.status.toUpperCase()}</Badge>
