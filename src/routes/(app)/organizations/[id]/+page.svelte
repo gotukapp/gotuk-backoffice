@@ -9,11 +9,11 @@
         TableHeadCell,
         TableBody,
         Table,
-        TableHead, TableBodyRow, Badge, Accordion, AccordionItem, Modal, Helper
+        TableHead, TableBodyRow, Badge, Accordion, AccordionItem, Modal, Helper, Alert
     } from 'flowbite-svelte';
     import { ArrowLeftOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
-    import { db } from '$lib'
+    import {db} from '$lib'
     import {
         collection,
         doc,
@@ -30,7 +30,12 @@
     import { writable } from "svelte/store";
     import { authUser } from '$lib/stores/authUser.js'
     import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages} from "$lib/utils.js";
+    import {slide} from "svelte/transition";
 
+
+    let validateAccountConfirmation = $state(false);
+    let showAlert = $state(false);
+    let alertMessage = $state('');
 
     let document = $state(null);
 
@@ -78,17 +83,6 @@
     let fileCivilLiabilityInsuranceInput = $state(null)
     let selectedCivilLiabilityInsuranceFiles =  $state([])
     let localCivilLiabilityInsurancePreviews = $state([])
-
-    let personalInsuranceData = $state(null);
-    let personalInsuranceFiles = $state([]);
-    let unsubscribePersonalDocuments;
-    let editingPersonalInsurance = $state(false)
-    let insurancePersonalExpirationDate = $state("")
-    let insurancePersonalCompanyName = $state("")
-    let insurancePersonalPolicyNumber = $state("")
-    let filePersonalInsuranceInput = $state(null)
-    let selectedPersonalInsuranceFiles =  $state([])
-    let localPersonalInsurancePreviews = $state([])
 
     let uploadProgress = $state(0)
     let isUploading = $state(false)
@@ -145,15 +139,6 @@
                         }
                     })
 
-                    const personalInsuranceDocumentsRef = collection(doc(db, "organizations", id), "personalAccidentInsurance");
-                    const personalInsuranceQueryDocuments = query(personalInsuranceDocumentsRef, orderBy("submitDate", "desc"), limit(1));
-                    unsubscribePersonalDocuments = onSnapshot(personalInsuranceQueryDocuments, async (querySnapshot) => {
-                        if (!querySnapshot.empty) {
-                            personalInsuranceData = querySnapshot.docs[0].data();
-                            personalInsuranceFiles = await getAllFilesFromFolder(`uploads/organizations/${$page.params.id}/personalAccidentInsurance/${querySnapshot.docs[0].id}`)
-                        }
-                    })
-
                 } else {
                     error = "Documento não encontrado!";
                 }
@@ -184,7 +169,6 @@
                     unsubscribeLicenseRNAATDocuments();
                     unsubscribeWorkAccidentDocuments();
                     unsubscribeCivilLiabilityDocuments();
-                    unsubscribePersonalDocuments();
                 };
             } else {
                 return () => {
@@ -193,7 +177,6 @@
                     unsubscribeLicenseRNAATDocuments();
                     unsubscribeWorkAccidentDocuments();
                     unsubscribeCivilLiabilityDocuments();
-                    unsubscribePersonalDocuments();
                 };
             }
         } catch (e) {
@@ -223,16 +206,6 @@
         localCivilLiabilityInsurancePreviews = selectedCivilLiabilityInsuranceFiles.map(file => URL.createObjectURL(file))
     }
 
-    function removePersonalInsuranceImage(index) {
-        selectedPersonalInsuranceFiles.splice(index, 1)
-        localPersonalInsurancePreviews.splice(index, 1)
-    }
-
-    function selectPersonalInsuranceFiles(event) {
-        selectedPersonalInsuranceFiles.push(...Array.from(event.target.files))
-        localPersonalInsurancePreviews = selectedPersonalInsuranceFiles.map(file => URL.createObjectURL(file))
-    }
-
     function removeActivityCertificateImage(index) {
         selectedActivityCertificateFiles.splice(index, 1)
         localActivityCertificatePreviews.splice(index, 1)
@@ -260,7 +233,7 @@
     async function submitActivityCertificate() {
         isUploading = true
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), "activityCertificate"))
-        await uploadImages(`uploads/organizations/${$page.params.id}/activityCertificate/${docRef.id}`, selectedActivityCertificateFiles, uploadProgress);
+        await uploadImages(`uploads/organizations/${$page.params.id}/activityCertificate/${docRef.id}`, selectedActivityCertificateFiles, (progress) => { uploadProgress = progress; });
         await setDoc(docRef, {
             status: 'pending',
             submitDate: serverTimestamp()
@@ -283,7 +256,7 @@
     async function submitLicenseRNAAT() {
         isUploading = true
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), "licenseRNAAT"))
-        await uploadImages(`uploads/organizations/${$page.params.id}/licenseRNAAT/${docRef.id}`, selectedLicenseRNAATFiles, uploadProgress);
+        await uploadImages(`uploads/organizations/${$page.params.id}/licenseRNAAT/${docRef.id}`, selectedLicenseRNAATFiles, (progress) => { uploadProgress = progress; });
         await setDoc(docRef, {
             number: licenseRNAATNumber,
             status: 'pending',
@@ -304,15 +277,10 @@
         editingCivilLiabilityInsurance = false;
     }
 
-    async function submitPersonalInsurance() {
-        await submit("personalAccidentInsurance", insurancePersonalCompanyName, insurancePersonalPolicyNumber, insurancePersonalExpirationDate, selectedPersonalInsuranceFiles)
-        editingPersonalInsurance = false;
-    }
-
     async function submit(documentType, name, number, expirationDate, files) {
         isUploading = true
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), documentType))
-        await uploadImages(`uploads/organizations/${$page.params.id}/${documentType}/${docRef.id}`, files, uploadProgress);
+        await uploadImages(`uploads/organizations/${$page.params.id}/${documentType}/${docRef.id}`, files, (progress) => { uploadProgress = progress; });
         await setDoc(docRef, {
             name: name,
             number: number,
@@ -337,6 +305,16 @@
         }
     }
 
+    async function changeAccountStatus(currentState) {
+        const documentRef = doc(db, "organizations", $page.params.id)
+        await updateDoc(documentRef, { "isValid": !currentState })
+        alertMessage = document.isValid ?  "Account successfully validated" : "Account successfully blocked"
+        showAlert = true
+        setTimeout(() => {
+            showAlert = false;
+        }, 2000);
+    }
+
     function editContacts() {
         contactName = document?.contactName
         address = document?.address
@@ -353,8 +331,18 @@
     {:else if error}
         <p>{error}</p>
     {:else}
+        {#if showAlert}
+            <Alert color="green" dismissable transition={slide} style="margin-top: 10px">
+                <svelte:fragment slot="icon">
+                    <CheckCircleSolid class="w-5 h-5" />
+                    <span class="sr-only">Check icon</span>
+                </svelte:fragment>
+                <span class="font-medium">{alertMessage}</span>
+            </Alert>
+        {/if}
         <Card size="xl" style="margin-top: 20px">
-            <div>
+            <Badge border color={document?.isValid ? 'green' :'red'}>{document?.isValid ? "Ok" : "Blocked"}</Badge>
+            <div class="mt-3">
                 <div class="mb-4">
                     <Label for="input-group-1" class="block mb-2">Código</Label>
                     <div id="insurance-company" class="readonly-input">{document?.orgCode}</div>
@@ -435,6 +423,18 @@
                         </div>
                     {/if}
                 </section>
+                {#if $authUser.isAdmin}
+                    <div class="mb-6">
+                        <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{document?.isValid ? "Block Account" : "Validate Account"}</Button>
+                        <Modal title={document?.isValid ? 'Block Account' : 'Validate Account'} bind:open={validateAccountConfirmation} autoclose>
+                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to {document?.isValid ? "block" : "validate"} this account.</p>
+                            <svelte:fragment slot="footer">
+                                <Button on:click={() => changeAccountStatus(document?.isValid)}>Yes</Button>
+                                <Button color="alternative">No</Button>
+                            </svelte:fragment>
+                        </Modal>
+                    </div>
+                {/if}
             </div>
         </Card>
         <Card size="xl" style="margin-top: 20px">
@@ -751,95 +751,6 @@
                         </div>
                     {/if}
                 </AccordionItem>
-                <AccordionItem>
-                    <span slot="header" class="flex items-center gap-2">
-                        {#if personalInsuranceData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
-                        Apólice de Seguro de Acidentes Pessoais
-                    </span>
-                    {#if personalInsuranceData?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(personalInsuranceData?.status)}>{personalInsuranceData?.status.toUpperCase()}</Badge>
-                        </div>
-                    {/if}
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                        <div id="insurance-company" class="readonly-input">{personalInsuranceData?.name}</div>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                        <div id="insurance-company" class="readonly-input">{personalInsuranceData?.number}</div>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                        <div id="insurance-company" class="readonly-input">{formatDate(personalInsuranceData?.expirationDate)}</div>
-                    </div>
-                    <div class="mb-6">
-                        <Label for="input-group-1" class="block mb-2">Documentos</Label>
-                        {#if personalInsuranceFiles.length > 0}
-                            <div class="flex gap-2 mt-2">
-                                {#each personalInsuranceFiles as file}
-                                    <div class="relative w-20 h-20 mr-5">
-                                        <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                        </a>
-                                    </div>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                    {#if $authUser.isAdmin}
-                        <Button pill color="light" on:click={() => approve("personalAccidentInsurance")}>Aprovar</Button>
-                    {/if}
-                    {#if !$authUser.isAdmin}
-                        <div>
-                            <Button pill color="light" on:click={() => editingPersonalInsurance = true}>Novo</Button>
-                            <Modal title="Apólice de Seguro de Acidentes de Trabalho" bind:open={editingPersonalInsurance} autoclose={!isUploading}>
-                                <div class="mb-6">
-                                    <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                                    <Input id="companyName" bind:value={insurancePersonalCompanyName}/>
-                                </div>
-                                <div class="mb-6">
-                                    <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                                    <Input id="policyNumber" bind:value={insurancePersonalPolicyNumber}/>
-                                </div>
-                                <div class="mb-6">
-                                    <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                                    <Input id="expirationDate" type="date" bind:value={insurancePersonalExpirationDate}/>
-                                </div>
-                                <div class="mb-6">
-                                    <Label for="input-group-1" class="block mb-2">Documentos</Label>
-                                    <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Condições da Apolice</span></Helper>
-                                    <Helper class='ml-3 mt-2' color='red'><span class="font-medium">- Recibo de Pagamento</span></Helper>
-                                    <input type="file" accept="image/*" bind:this={filePersonalInsuranceInput} multiple onchange={selectPersonalInsuranceFiles} style="display: none" />
-                                    {#if localPersonalInsurancePreviews.length > 0}
-                                        <div class="flex gap-2 mt-2">
-                                            {#each localPersonalInsurancePreviews as preview, index}
-                                                <div class="relative w-20 h-20 previewImage">
-                                                    <!-- Image Preview -->
-                                                    <img alt="Document" class="w-full h-full object-cover rounded-md" src={preview} />
-                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removePersonalInsuranceImage(index)}} >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            {/each}
-                                        </div>
-                                    {/if}
-                                </div>
-                                <Button color="blue" on:click={(event) => { event.stopPropagation(); openFilePicker(filePersonalInsuranceInput); }}>
-                                    Adicionar
-                                </Button>
-                                <svelte:fragment slot="footer">
-                                    <Button on:click={() => submitPersonalInsurance()}>Submeter</Button>
-                                    {#if isUploading}
-                                        <p>Uploading... {uploadProgress.toFixed(0)}%</p>
-                                    {/if}
-                                </svelte:fragment>
-                            </Modal>
-                        </div>
-                    {/if}
-                </AccordionItem>
             </Accordion>
         </Card>
         {#if $authUser.isAdmin}
@@ -852,6 +763,7 @@
                         <TableHeadCell>License Plate</TableHeadCell>
                         <TableHeadCell>Seats</TableHeadCell>
                         <TableHeadCell>Electric</TableHeadCell>
+                        <TableHeadCell>Status</TableHeadCell>
                         <TableHeadCell>
                             <span class="sr-only">Edit</span>
                         </TableHeadCell>
@@ -862,6 +774,7 @@
                                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                                 <TableBodyCell>{tuk.seats}</TableBodyCell>
                                 <TableBodyCell>{tuk.electric}</TableBodyCell>
+                                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                                 <TableBodyCell>
                                     <a href="/tuks/{tuk.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                                 </TableBodyCell>

@@ -38,10 +38,6 @@
     let workAccidentInsuranceData = $state(null);
     let workAccidentInsuranceFiles = $state([]);
 
-    let unsubscribePersonalAccidentInsuranceDocuments;
-    let personalAccidentInsuranceData = $state(null);
-    let personalAccidentInsuranceFiles = $state([]);
-
     let unsubscribeCriminalRecordDocuments;
     let criminalRecordData = $state(null);
     let criminalRecordFiles = $state([]);
@@ -118,14 +114,6 @@
                     }
                 })
 
-                const queryPersonalAccidentInsurance = query(collection(doc(db, "users", id), "personalAccidentInsurance"), orderBy("submitDate", "desc"), limit(1));
-                unsubscribePersonalAccidentInsuranceDocuments = onSnapshot(queryPersonalAccidentInsurance, async (querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        personalAccidentInsuranceData = querySnapshot.docs[0].data();
-                        personalAccidentInsuranceFiles = await getAllFilesFromFolder(`uploads/users/${$page.params.id}/personalAccidentInsurance/${querySnapshot.docs[0].id}`)
-                    }
-                })
-
                 const queryCriminalRecord = query(collection(doc(db, "users", id), "criminalRecord"), orderBy("submitDate", "desc"), limit(1));
                 unsubscribeCriminalRecordDocuments = onSnapshot(queryCriminalRecord, async (querySnapshot) => {
                     if (!querySnapshot.empty) {
@@ -138,7 +126,6 @@
                 return () => {
                     unsubscribePersonalDataDocuments();
                     unsubscribeWorkAccidentInsuranceDocuments();
-                    unsubscribePersonalAccidentInsuranceDocuments();
                     unsubscribeCriminalRecordDocuments();
                 };
             } else {
@@ -169,8 +156,8 @@
             </Alert>
         {/if}
         <Card size="xl" style="margin-top: 20px">
-            <Badge border color="{guide.accountValidated ? 'green' :'red'}">{guide.accountValidated ? "Valid" : "Blocked"}</Badge>
-            <div style="margin-top: 20px">
+            <Badge border color={guide.accountValidated ? 'green' :'red'}>{guide.accountValidated ? "Ok" : "Blocked"}</Badge>
+            <div class="mt-3">
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Name</Label>
                     <Input id="name" bind:value={guide.name} readonly/>
@@ -198,7 +185,7 @@
                 {#if $authUser.isAdmin && guide.accountAccepted}
                     <div class="mb-6">
                         <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{guide.accountValidated ? "Block Account" : "Validate Account"}</Button>
-                        <Modal title="{guide.accountValidated ? 'Block Account' : 'Validate Account'}" bind:open={validateAccountConfirmation} autoclose>
+                        <Modal title={guide.accountValidated ? 'Block Account' : 'Validate Account'} bind:open={validateAccountConfirmation} autoclose>
                             <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to {guide.accountValidated ? "block" : "validate"} this account.</p>
                             <svelte:fragment slot="footer">
                                 <Button on:click={() => changeAccountStatus(guide.accountValidated)}>Yes</Button>
@@ -258,8 +245,8 @@
                         <div class="flex gap-2 mt-2">
                             {#each personalDataFiles as file}
                                 <div class="relative w-20 h-20 mr-5">
-                                    <a href={file} target="_blank" rel="noopener noreferrer">
-                                        <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                        <img src={file.url} alt="Document" class="w-full h-full object-cover rounded-md" />
                                     </a>
                                 </div>
                             {/each}
@@ -300,8 +287,8 @@
                         <div class="flex gap-2 mt-2">
                             {#each workAccidentInsuranceFiles as file}
                                 <div class="relative w-20 h-20 mr-5">
-                                    <a href={file} target="_blank" rel="noopener noreferrer">
-                                        <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                        <img src={file.url} alt="Document" class="w-full h-full object-cover rounded-md" />
                                     </a>
                                 </div>
                             {/each}
@@ -310,48 +297,6 @@
                 </div>
                 {#if $authUser.isAdmin}
                     <Button pill color="light" on:click={() => approve("workAccidentInsurance")}>Aprovar</Button>
-                {/if}
-            </AccordionItem>
-            <AccordionItem>
-                {#if personalAccidentInsuranceData?.status}
-                    <div class="mb-6">
-                        <Badge large color={getStatusColor(personalAccidentInsuranceData?.status)}>{personalAccidentInsuranceData?.status.toUpperCase()}</Badge>
-                    </div>
-                {/if}
-                <span slot="header" class="flex items-center gap-2">
-                        {#if personalAccidentInsuranceData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
-                    Apólice de Seguro de Acidentes Pessoais
-                    </span>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                    <div id="insurance-company" class="readonly-input">{personalAccidentInsuranceData?.name}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                    <div id="insurance-company" class="readonly-input">{personalAccidentInsuranceData?.number}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                    <div id="insurance-company" class="readonly-input">{formatDate(personalAccidentInsuranceData?.expirationDate)}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Documentos</Label>
-                    {#if personalAccidentInsuranceFiles.length > 0}
-                        <div class="flex gap-2 mt-2">
-                            {#each personalAccidentInsuranceFiles as file}
-                                <div class="relative w-20 h-20 mr-5">
-                                    <a href={file} target="_blank" rel="noopener noreferrer">
-                                        <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                    </a>
-                                </div>
-                            {/each}
-                        </div>
-                    {/if}
-                </div>
-                {#if $authUser.isAdmin}
-                    <Button pill color="light" on:click={() => approve("personalAccidentInsurance")}>Aprovar</Button>
                 {/if}
             </AccordionItem>
             <AccordionItem>
@@ -372,8 +317,8 @@
                         <div class="flex gap-2 mt-2">
                             {#each criminalRecordFiles as file}
                                 <div class="relative w-20 h-20 mr-5">
-                                    <a href={file} target="_blank" rel="noopener noreferrer">
-                                        <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                        <img src={file.url} alt="Document" class="w-full h-full object-cover rounded-md" />
                                     </a>
                                 </div>
                             {/each}

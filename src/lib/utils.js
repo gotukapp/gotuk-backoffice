@@ -1,4 +1,4 @@
-import {getDownloadURL, listAll, ref, uploadBytes} from "firebase/storage";
+import {getDownloadURL, listAll, ref, uploadBytes, getMetadata} from "firebase/storage";
 import {storage} from "./index.js";
 
 export async function getAllFilesFromFolder(folderPath) {
@@ -6,8 +6,13 @@ export async function getAllFilesFromFolder(folderPath) {
     try {
         const result = await listAll(folderRef)
         return await Promise.all(result.items.map(async (fileRef) => {
-            return getDownloadURL(fileRef) // Get each file's URL
-        }))
+            const url = await getDownloadURL(fileRef);
+            const metadata = await getMetadata(fileRef);
+            return {
+                url,
+                type: metadata.contentType // Example: "image/png", "application/pdf"
+            };
+        }));
     } catch (error) {
         console.error("Error fetching files:", error)
         return []
@@ -27,14 +32,16 @@ export function openFilePicker(fileInput) {
     fileInput.click()
 }
 
-export async function uploadImages(path, selectedFiles, uploadProgress) {
+export async function uploadImages(path, selectedFiles, onProgressUpdate) {
     if (selectedFiles.length === 0) return
     let uploadedUrls = []
 
     for (let [index, file] of selectedFiles.entries()) {
         const storageRef = ref(storage, `${path}/${file.name}`)
         await uploadBytes(storageRef, file)
-        uploadProgress = (index / selectedFiles.length) * 100
+        if (onProgressUpdate) {
+            onProgressUpdate((index / selectedFiles.length) * 100);
+        }
         const downloadUrl = await getDownloadURL(storageRef)
         uploadedUrls.push(downloadUrl)
     }

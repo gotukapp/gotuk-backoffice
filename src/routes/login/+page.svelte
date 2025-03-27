@@ -1,8 +1,9 @@
 <script lang="ts">import { Section, Register } from "flowbite-svelte-blocks";
 import { Button, Checkbox, Label, Input } from "flowbite-svelte";
 import {signInWithEmailAndPassword} from 'firebase/auth'
-import {auth} from '$lib'
 import {goto} from "$app/navigation";
+import {auth} from '$lib'
+import {login, authUser} from '$lib/stores/authUser.js'
 
 let email = $state('')
 let password = $state('')
@@ -10,11 +11,20 @@ let password = $state('')
 const handlePasswordLogin = async (event) => {
     event.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-            goto('/dashboard')
+        .then(async () => {
+            await login(auth.currentUser)
+            if ($authUser.isAdmin) {
+                goto('/dashboard')
+            } else {
+                goto('/organizations')
+            }
         })
         .catch((error) => {
-            alert(error.code + ' ' +error.message)
+            if (error.code == "auth/invalid-credential") {
+                alert("Credenciais inválidas, por favor tente novamente.")
+            } else {
+                alert(error.code + ' ' + error.message)
+            }
         });
 }
 

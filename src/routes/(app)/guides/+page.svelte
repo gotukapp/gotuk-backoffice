@@ -52,7 +52,7 @@
         <TableHeadCell>Email</TableHeadCell>
         <TableHeadCell>Phone</TableHeadCell>
         <TableHeadCell>Account Accepted</TableHeadCell>
-        <TableHeadCell>Account Status</TableHeadCell>
+        <TableHeadCell>Status</TableHeadCell>
         <TableHeadCell>Rating</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Ver</span>
@@ -65,7 +65,7 @@
                 <TableBodyCell>{user.email}</TableBodyCell>
                 <TableBodyCell>{user.phone}</TableBodyCell>
                 <TableBodyCell>{user.accountAccepted ? "Yes" : "No"}</TableBodyCell>
-                <TableBodyCell>{user.accountValidated ? "Valid" : "Blocked"}</TableBodyCell>
+                <TableBodyCell>{user.accountValidated ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell>{user.rating}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/guides/{user.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>

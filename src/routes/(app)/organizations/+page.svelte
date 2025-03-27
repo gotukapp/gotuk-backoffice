@@ -4,10 +4,17 @@
     import {onMount} from "svelte";
     import {db} from '$lib'
     import { writable } from "svelte/store";
+    import { authUser } from '$lib/stores/authUser.js'
+    import {goto} from "$app/navigation";
+    import {SearchSolid} from "flowbite-svelte-icons";
 
     let orgs = writable([]);
 
     onMount(async () => {
+        if (!$authUser.isAdmin) {
+            await goto('/organizations/' + $authUser.user?.organizationRef.id)
+        }
+
         const unsubscribe = onSnapshot(collection(db, "organizations"), async (snapshot) => {
             const organizations = await Promise.all(snapshot.docs.map(async (docSnap) => {
                 const orgData = { id: docSnap.id, ...docSnap.data() };
@@ -37,6 +44,7 @@
     </caption>
     <TableHead>
         <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Status</TableHeadCell>
         <TableHeadCell>Tuks</TableHeadCell>
         <TableHeadCell>Guides</TableHeadCell>
         <TableHeadCell>
@@ -47,10 +55,11 @@
         {#each $orgs as org}
             <TableBodyRow>
                 <TableBodyCell>{org.name}</TableBodyCell>
+                <TableBodyCell>{org.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell>{org.tuksCount}</TableBodyCell>
                 <TableBodyCell>{org.guidesCount}</TableBodyCell>
                 <TableBodyCell>
-                    <a href="/organizations/{org.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
+                    <a href="/organizations/{org.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                 </TableBodyCell>
             </TableBodyRow>
         {/each}

@@ -87,6 +87,7 @@
             seats: parseInt(seats),
             organizationRef: $authUser.user.organizationRef,
             disabled: false,
+            isValid: false,
             creationDate: serverTimestamp()
         });
 
@@ -108,6 +109,7 @@
         <TableHeadCell>License Plate</TableHeadCell>
         <TableHeadCell>Seats</TableHeadCell>
         <TableHeadCell>Electric</TableHeadCell>
+        <TableHeadCell>Status</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Edit</span>
         </TableHeadCell>
@@ -117,7 +119,8 @@
             <TableBodyRow>
                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                 <TableBodyCell>{tuk.seats}</TableBodyCell>
-                <TableBodyCell>{tuk.electric}</TableBodyCell>
+                <TableBodyCell>{tuk.electric ? "Yes" : "No"}</TableBodyCell>
+                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/tuks/{tuk.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                     <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"
