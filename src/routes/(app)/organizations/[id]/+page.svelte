@@ -11,7 +11,7 @@
         Table,
         TableHead, TableBodyRow, Badge, Accordion, AccordionItem, Modal, Helper, Alert
     } from 'flowbite-svelte';
-    import { ArrowLeftOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
+    import { ArrowLeftOutline, CheckCircleSolid, FilePdfSolid } from 'flowbite-svelte-icons';
     import { onMount } from "svelte";
     import {db} from '$lib'
     import {
@@ -457,8 +457,16 @@
                             <div class="flex gap-2 mt-2">
                                 {#each activityCertificateFiles as file}
                                     <div class="relative w-20 h-20 mr-5">
-                                        <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                            {#if file.type.startsWith('image/')}
+                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                            {:else if file.type === 'application/pdf'}
+                                                <FilePdfSolid class="w-10 h-10"/>
+                                            {:else if file.type.includes('word')}
+                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                            {:else}
+                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                            {/if}
                                         </a>
                                     </div>
                                 {/each}
@@ -524,8 +532,16 @@
                             <div class="flex gap-2 mt-2">
                                 {#each licenseRNAATFiles as file}
                                     <div class="relative w-20 h-20 mr-5">
-                                        <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                            {#if file.type.startsWith('image/')}
+                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                            {:else if file.type === 'application/pdf'}
+                                                <FilePdfSolid class="w-10 h-10"/>
+                                            {:else if file.type.includes('word')}
+                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                            {:else}
+                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                            {/if}
                                         </a>
                                     </div>
                                 {/each}
@@ -603,8 +619,16 @@
                             <div class="flex gap-2 mt-2">
                                 {#each civilLiabilityInsuranceFiles as file}
                                     <div class="relative w-20 h-20 mr-5">
-                                        <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                            {#if file.type.startsWith('image/')}
+                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                            {:else if file.type === 'application/pdf'}
+                                                <FilePdfSolid class="w-10 h-10"/>
+                                            {:else if file.type.includes('word')}
+                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                            {:else}
+                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                            {/if}
                                         </a>
                                     </div>
                                 {/each}
@@ -692,8 +716,16 @@
                             <div class="flex gap-2 mt-2">
                                 {#each workAccidentInsuranceFiles as file}
                                     <div class="relative w-20 h-20 mr-5">
-                                        <a href={file} target="_blank" rel="noopener noreferrer">
-                                            <img src={file} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                            {#if file.type.startsWith('image/')}
+                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                            {:else if file.type === 'application/pdf'}
+                                                <FilePdfSolid class="w-10 h-10"/>
+                                            {:else if file.type.includes('word')}
+                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                            {:else}
+                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                            {/if}
                                         </a>
                                     </div>
                                 {/each}

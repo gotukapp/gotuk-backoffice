@@ -269,32 +269,39 @@
                         {/if}
                     Apólice de Seguro de Acidentes de Trabalho
                     </span>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
-                    <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.name}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
-                    <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.number}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
-                    <div id="insurance-company" class="readonly-input">{formatDate(workAccidentInsuranceData?.expirationDate)}</div>
-                </div>
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Documentos</Label>
-                    {#if workAccidentInsuranceFiles.length > 0}
-                        <div class="flex gap-2 mt-2">
-                            {#each workAccidentInsuranceFiles as file}
-                                <div class="relative w-20 h-20 mr-5">
-                                    <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                        <img src={file.url} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                    </a>
-                                </div>
-                            {/each}
-                        </div>
-                    {/if}
-                </div>
+                {#if workAccidentInsuranceData?.useOrganizationInsurance}
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2"> - Está incluído na apólice da empresa.</Label>
+                    </div>
+                {/if}
+                {#if !workAccidentInsuranceData?.useOrganizationInsurance}
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
+                        <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.name}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Nº Apólice</Label>
+                        <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.number}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Data de Validade</Label>
+                        <div id="insurance-company" class="readonly-input">{formatDate(workAccidentInsuranceData?.expirationDate)}</div>
+                    </div>
+                    <div class="mb-6">
+                        <Label for="input-group-1" class="block mb-2">Documentos</Label>
+                        {#if workAccidentInsuranceFiles.length > 0}
+                            <div class="flex gap-2 mt-2">
+                                {#each workAccidentInsuranceFiles as file}
+                                    <div class="relative w-20 h-20 mr-5">
+                                        <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                            <img src={file.url} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                        </a>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
                 {#if $authUser.isAdmin}
                     <Button pill color="light" on:click={() => approve("workAccidentInsurance")}>Aprovar</Button>
                 {/if}
