@@ -162,7 +162,7 @@
         await setDoc(docRef, {
             name: name,
             number: number,
-            expirationDate: new Date(expirationDate),
+            expirationDate: expirationDate ? new Date(expirationDate) : expirationDate,
             status: 'pending',
             submitDate: serverTimestamp()
         });
