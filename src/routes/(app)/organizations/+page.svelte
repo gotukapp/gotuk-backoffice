@@ -20,11 +20,15 @@
                 const orgData = { id: docSnap.id, ...docSnap.data() };
 
                 // Query for number of Tuks associated with this organization
-                const tuksQuery = query(collection(db, "tuktuks"), where("organizationRef", "==", doc(db, "organizations", orgData.id)));
+                const tuksQuery = query(collection(db, "tuktuks")
+                    , where("organizationRef", "==", doc(db, "organizations", orgData.id))
+                    , where("disabled", "==", false));
                 const tuksCount = (await getCountFromServer(tuksQuery)).data().count;
 
                 // Query for number of Tuks associated with this organization
-                const guidesQuery = query(collection(db, "users"), where("organizationRef", "==", doc(db, "organizations", orgData.id))
+                const guidesQuery = query(collection(db, "users")
+                    , where("organizationRef", "==", doc(db, "organizations", orgData.id))
+                    , where("disabled", "==", false)
                     , where("guideMode", "==", true));
                 const guidesCount = (await getCountFromServer(guidesQuery)).data().count;
 
