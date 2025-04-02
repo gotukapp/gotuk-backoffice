@@ -22,9 +22,9 @@
         onSnapshot,
         orderBy,
         query, serverTimestamp,
-        setDoc,
         updateDoc,
-        where
+        where,
+        writeBatch
     } from "firebase/firestore";
     import { page } from "$app/stores";
     import { writable } from "svelte/store";
@@ -186,9 +186,9 @@
         }
     });
 
-    function removeImage(index) {
-        selectedFiles.splice(index, 1)
-        localPreviews.splice(index, 1)
+    function removeImage(files, previews, index) {
+        files.splice(index, 1)
+        previews.splice(index, 1)
     }
 
     function selectFiles(event) {
@@ -196,24 +196,19 @@
         localPreviews = selectedFiles.map(file => URL.createObjectURL(file))
     }
 
-    function removeCivilLiabilityInsuranceImage(index) {
-        selectedCivilLiabilityInsuranceFiles.splice(index, 1)
-        localCivilLiabilityInsurancePreviews.splice(index, 1)
-    }
-
     function selectCivilLiabilityInsuranceFiles(event) {
         selectedCivilLiabilityInsuranceFiles.push(...Array.from(event.target.files))
         localCivilLiabilityInsurancePreviews = selectedCivilLiabilityInsuranceFiles.map(file => URL.createObjectURL(file))
     }
 
-    function removeActivityCertificateImage(index) {
-        selectedActivityCertificateFiles.splice(index, 1)
-        localActivityCertificatePreviews.splice(index, 1)
-    }
-
     function selectActivityCertificateFiles(event) {
         selectedActivityCertificateFiles.push(...Array.from(event.target.files))
         localActivityCertificatePreviews = selectedActivityCertificateFiles.map(file => URL.createObjectURL(file))
+    }
+
+    function selectLicenseRNAATFiles(event) {
+        selectedLicenseRNAATFiles.push(...Array.from(event.target.files))
+        localLicenseRNAATPreviews = selectedLicenseRNAATFiles.map(file => URL.createObjectURL(file))
     }
 
     async function submitContacts() {
@@ -232,37 +227,48 @@
 
     async function submitActivityCertificate() {
         isUploading = true
+        const batch = writeBatch(db);
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), "activityCertificate"))
         await uploadImages(`uploads/organizations/${$page.params.id}/activityCertificate/${docRef.id}`, selectedActivityCertificateFiles, (progress) => { uploadProgress = progress; });
-        await setDoc(docRef, {
+        batch.set(docRef, {
             status: 'pending',
             submitDate: serverTimestamp()
         });
-
+        createMailDocument(batch, $page.params.id, document?.name, "Comprovativo de Atividade ou Certidão Permanente")
+        await batch.commit();
         isUploading = false
         editingActivityCertificate = false;
     }
 
-    function removeLicenseRNAATImage(index) {
-        selectedLicenseRNAATFiles.splice(index, 1)
-        localLicenseRNAATPreviews.splice(index, 1)
-    }
-
-    function selectLicenseRNAATFiles(event) {
-        selectedLicenseRNAATFiles.push(...Array.from(event.target.files))
-        localLicenseRNAATPreviews = selectedLicenseRNAATFiles.map(file => URL.createObjectURL(file))
+    function createMailDocument(batch, orgId, orgName, type) {
+        const mailRef = doc(collection(db, "mail"));
+        batch.set(mailRef, {
+            to: ["suporte@gotuk.pt"],
+            message: {
+                subject: "Novos Documentos Submetidos para Verificação",
+                html: `
+                <p>Olá,</p>
+                <p>A empresa <strong>${orgName}</strong> enviou novos documentos para verificação.</p>
+                <p><strong>Tipo de Documentos:</strong> ${type}.</p>
+                <p>Para aceder e verificar os documentos submetidos, clique no link abaixo:</p>
+                <p><a href="http://backoffice.gotuk.pt/organizations/${orgId}" target="_blank">Verificar Documentos</a></p>
+            `
+            }
+        });
     }
 
     async function submitLicenseRNAAT() {
         isUploading = true
+        const batch = writeBatch(db);
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), "licenseRNAAT"))
         await uploadImages(`uploads/organizations/${$page.params.id}/licenseRNAAT/${docRef.id}`, selectedLicenseRNAATFiles, (progress) => { uploadProgress = progress; });
-        await setDoc(docRef, {
+        batch.set(docRef, {
             number: licenseRNAATNumber,
             status: 'pending',
             submitDate: serverTimestamp()
         });
-
+        createMailDocument(batch, $page.params.id, document?.name, "Licença RNAAT")
+        await batch.commit();
         isUploading = false
         editingLicenseRNAAT = false;
     }
@@ -279,16 +285,18 @@
 
     async function submit(documentType, name, number, expirationDate, files) {
         isUploading = true
+        const batch = writeBatch(db);
         const docRef = doc(collection(doc(db, "organizations", $page.params.id), documentType))
         await uploadImages(`uploads/organizations/${$page.params.id}/${documentType}/${docRef.id}`, files, (progress) => { uploadProgress = progress; });
-        await setDoc(docRef, {
+        batch.set(docRef, {
             name: name,
             number: number,
             expirationDate: expirationDate ? new Date(expirationDate) : expirationDate,
             status: 'pending',
             submitDate: serverTimestamp()
         });
-
+        createMailDocument(batch, $page.params.id, document?.name, documentType === "civilLiabilityInsurance" ? "Apólice de Seguro de Responsabilidade Civil" : "Apólice de Seguro de Acidentes de Trabalho")
+        await batch.commit();
         isUploading = false
     }
 
@@ -489,7 +497,7 @@
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
                                                     <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeActivityCertificateImage(index)}} >
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedActivityCertificateFiles, localActivityCertificatePreviews, index)}} >
                                                         ✕
                                                     </button>
                                                 </div>
@@ -568,7 +576,7 @@
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
                                                     <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeLicenseRNAATImage(index)}} >
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedLicenseRNAATFiles, localLicenseRNAATPreviews, index)}} >
                                                         ✕
                                                     </button>
                                                 </div>
@@ -665,7 +673,7 @@
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
                                                     <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
-                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeCivilLiabilityInsuranceImage(index)}} >
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedCivilLiabilityInsuranceFiles, localCivilLiabilityInsurancePreviews, index)}} >
                                                         ✕
                                                     </button>
                                                 </div>
@@ -762,7 +770,7 @@
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
                                                     <img alt="Document" class="w-full h-full object-cover rounded-md" src={preview} />
-                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(index)}} >
+                                                    <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedFiles, localPreviews, index)}} >
                                                         ✕
                                                     </button>
                                                 </div>
