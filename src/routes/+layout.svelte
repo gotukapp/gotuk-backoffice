@@ -14,12 +14,16 @@
         } else {
             await login(user)
             if ($authUser.isAdmin) {
-                await goto('/dashboard');
+                if (data.url.length === 0) {
+                    await goto('/dashboard');
+                }
             } else {
                 if ($authUser.user?.organizationRef === undefined) {
                     await goto('/organizations/create')
                 } else {
-                    await goto('/organizations/' + $authUser.user?.organizationRef.id)
+                    if (data.url.length === 0) {
+                        await goto('/organizations/' + $authUser.user?.organizationRef.id)
+                    }
                 }
             }
         }

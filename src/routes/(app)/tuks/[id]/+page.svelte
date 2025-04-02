@@ -80,10 +80,6 @@
                 if (docSnap.exists()) {
                     tuktukDoc = docSnap.data();
 
-                    if (!$authUser.isAdmin && $authUser.user.organizationRef === tuktukDoc.organizationRef) {
-                        await goto('/tuks')
-                    }
-
                     const vehicleInsuranceDocRef = collection(doc(db, "tuktuks", id), "vehicleInsurance");
                     const queryVehicleInsurance = query(vehicleInsuranceDocRef, orderBy("submitDate", "desc"), limit(1));
                     unsubscribeInsuranceDoc = onSnapshot(queryVehicleInsurance, async (querySnapshot) => {
@@ -128,6 +124,15 @@
             loading = false;
         }
     });
+
+    $effect(async () => {
+        if (!$authUser.isAdmin
+            && $authUser.user !== null
+            && tuktukDoc !== null
+            && $authUser.user.organizationRef.path !== tuktukDoc.organizationRef.path) {
+            await goto('/tuks')
+        }
+    })
 
     async function submitPersonalInsurance() {
         await submit("personalAccidentInsurance", insurancePersonalCompanyName, insurancePersonalPolicyNumber, insurancePersonalExpirationDate, selectedPersonalInsuranceFiles)

@@ -144,40 +144,28 @@
                 }
             });
 
-            if ($authUser.isAdmin) {
-                // Listen for live updates in tuks
-                const qTuks = query(collection(db, "tuktuks"), where("organizationRef", "==", docRef), where("disabled", "==", false));
-                const unsubscribeTuks = onSnapshot(qTuks, (querySnapshot) => {
-                    tuks.set(querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
-                });
+            // Listen for live updates in tuks
+            const qTuks = query(collection(db, "tuktuks"), where("organizationRef", "==", docRef), where("disabled", "==", false));
+            const unsubscribeTuks = onSnapshot(qTuks, (querySnapshot) => {
+                tuks.set(querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
+            });
 
-                // Listen for live updates in users
-                const qUsers = query(collection(db, "users"), where("organizationRef", "==", docRef)
-                    , where("guideMode", "==", true), where("disabled", "==", false));
-                console.log("Querying for tuktuks with organizationRef:", docRef.path);
-                const unsubscribeUsers = onSnapshot(qUsers, (querySnapshot) => {
-                    console.log("Users found:", querySnapshot.docs.length);
-                    users.set(querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
-                });
+            // Listen for live updates in users
+            const qUsers = query(collection(db, "users"), where("organizationRef", "==", docRef)
+                , where("guideMode", "==", true), where("disabled", "==", false));
+            const unsubscribeUsers = onSnapshot(qUsers, (querySnapshot) => {
+                users.set(querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
+            });
 
-                return () => {
-                    unsubscribeOrg();
-                    unsubscribeTuks();
-                    unsubscribeUsers();
+            return () => {
+                unsubscribeOrg();
+                unsubscribeTuks();
+                unsubscribeUsers();
 
-                    unsubscribeActivityCertificateDocuments();
-                    unsubscribeLicenseRNAATDocuments();
-                    unsubscribeWorkAccidentDocuments();
-                    unsubscribeCivilLiabilityDocuments();
-                };
-            } else {
-                return () => {
-                    unsubscribeOrg();
-                    unsubscribeActivityCertificateDocuments();
-                    unsubscribeLicenseRNAATDocuments();
-                    unsubscribeWorkAccidentDocuments();
-                    unsubscribeCivilLiabilityDocuments();
-                };
+                unsubscribeActivityCertificateDocuments();
+                unsubscribeLicenseRNAATDocuments();
+                unsubscribeWorkAccidentDocuments();
+                unsubscribeCivilLiabilityDocuments();
             }
         } catch (e) {
             error = "Erro ao carregar documento: " + e.message;
