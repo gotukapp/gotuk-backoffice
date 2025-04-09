@@ -158,9 +158,22 @@
         <Card size="xl" style="margin-top: 20px">
             <Badge border color={guide.accountValidated ? 'green' :'red'}>{guide.accountValidated ? "Ok" : "Blocked"}</Badge>
             <div class="mt-3">
-                <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Name</Label>
-                    <Input id="name" bind:value={guide.name} readonly/>
+                <div class="row">
+                    <div class="mb-4" style="float: left; width: 85%">
+                        <Label for="input-group-1" class="block mb-2">Name</Label>
+                        <div class="flex items-center space-x-2">
+                            <div id="insurance-company" class="readonly-input">{guide.name}</div>
+                        </div>
+                    </div>
+                    <div class="mb-4" style="float: right; width: 10%; margin-left: 5%">
+                        <div class="flex items-center space-x-2">
+                            <div class="relative w-20 h-20 mr-5">
+                                <a href={guide.profilePhoto ?? "/avatar.png"} target="_blank" rel="noopener noreferrer">
+                                    <img src={guide.profilePhoto ?? "/avatar.png"} alt="Document" class="w-full h-full object-cover rounded-full" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Email</Label>
@@ -172,7 +185,7 @@
                 </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Languages</Label>
-                    <Input id="name" value={guide.language.toString().toUpperCase()} readonly/>
+                    <Input id="name" value={guide.language != null ? guide.language.toString().toUpperCase() : ''} readonly/>
                 </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Rating</Label>
@@ -357,5 +370,10 @@
         background-color: #f9f9f9;
         border: 1px solid #ddd;
         border-radius: 5px;
+    }
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
     }
 </style>
