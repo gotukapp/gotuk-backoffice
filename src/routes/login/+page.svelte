@@ -41,7 +41,7 @@
         <img src="/applogo.png" alt="GoTuk Logo" class="mx-auto h-16 mb-4" />
 
         <form class="space-y-6" on:submit={handlePasswordLogin}>
-            <h3 class="text-xl font-medium text-gray-900">Entrar no GoTuk</h3>
+            <h3 class="text-xl font-medium text-gray-900">GoTuk</h3>
             <div>
                 <Label class="block text-left text-gray-700 font-medium mb-2">
                     Email
@@ -54,7 +54,7 @@
                 </Label>
                 <Input class="input" type="password" bind:value={password} name="password" placeholder="•••••" required />
             </div>
-            <Button type="submit" class="w-full bg-[#E51D45] text-white">Sign in</Button>
+            <Button type="submit" class="w-full bg-[#E51D45] text-white">Entrar</Button>
             <p class="text-sm text-gray-500">
                 Não tem uma conta? <a href="/account" class="text-[#E51D45] hover:underline">Criar Conta</a>
             </p>

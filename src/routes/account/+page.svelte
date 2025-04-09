@@ -49,12 +49,12 @@
         <img src="/applogo.png" alt="GoTuk Logo" class="mx-auto h-16 mb-4" />
 
         <form class="space-y-6" on:submit={handleRegister}>
-            <h3 class="text-xl font-medium text-gray-900">Criar Conta</h3>
+            <h3 class="text-xl font-medium text-gray-900">Criar Conta de Empresa</h3>
             <div>
                 <Label class="block text-left text-gray-700 font-medium mb-2">
                     Nome
                 </Label>
-                <Input class="input" bind:value={name} name="name" placeholder="Seu nome" required />
+                <Input class="input" bind:value={name} name="name" placeholder="Nome da empresa" required />
             </div>
             <div>
                 <Label class="block text-left text-gray-700 font-medium mb-2">
