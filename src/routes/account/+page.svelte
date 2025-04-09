@@ -21,10 +21,10 @@
             await setDoc(doc(db, "users", userCredential.user.uid), {
                 email: email,
                 name: name,
-                isAdmin: false, // Additional fields can be added here
+                isAdmin: false,
             });
             message = "Account created successfully!";
-            goto("/guides");
+            goto("/organizations/create");
         } catch (error) {
             message = `Error: ${error.message}`;
         }
@@ -49,12 +49,12 @@
         <img src="/applogo.png" alt="GoTuk Logo" class="mx-auto h-16 mb-4" />
 
         <form class="space-y-6" on:submit={handleRegister}>
-            <h3 class="text-xl font-medium text-gray-900">Criar Conta de Empresa</h3>
+            <h3 class="text-xl font-medium text-gray-900">Criar Conta</h3>
             <div>
                 <Label class="block text-left text-gray-700 font-medium mb-2">
                     Nome
                 </Label>
-                <Input class="input" bind:value={name} name="name" placeholder="Nome da empresa" required />
+                <Input class="input" bind:value={name} name="name" placeholder="Nome do utilizador" required />
             </div>
             <div>
                 <Label class="block text-left text-gray-700 font-medium mb-2">
