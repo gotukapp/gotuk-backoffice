@@ -301,9 +301,20 @@
         }
     }
 
+    function generateRandomCode() {
+        return `${randomFourDigits()}-${randomFourDigits()}-${randomFourDigits()}`
+    }
+
+    function randomFourDigits() {
+        return Math.floor(1000 + Math.random() * 9000) // Ensures a 4-digit number
+    }
+
     async function changeAccountStatus(currentState) {
         const documentRef = doc(db, "organizations", $page.params.id)
-        await updateDoc(documentRef, { "isValid": !currentState })
+        await updateDoc(documentRef,
+            { "orgCode": generateRandomCode() },
+            { "isValid": !currentState }
+        )
         alertMessage = document.isValid ?  "Account successfully validated" : "Account successfully blocked"
         showAlert = true
         setTimeout(() => {

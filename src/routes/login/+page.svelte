@@ -1,62 +1,63 @@
-<script lang="ts">import { Section, Register } from "flowbite-svelte-blocks";
-import { Button, Checkbox, Label, Input } from "flowbite-svelte";
-import {signInWithEmailAndPassword} from 'firebase/auth'
-import {goto} from "$app/navigation";
-import {auth} from '$lib'
-import {login, authUser} from '$lib/stores/authUser.js'
+<script lang="ts">
+    import { onMount } from 'svelte';
+    import { signInWithEmailAndPassword } from 'firebase/auth';
+    import { goto } from '$app/navigation';
+    import { auth } from '$lib';
+    import { login, authUser } from '$lib/stores/authUser.js';
+    import { Button, Input, Label } from 'flowbite-svelte';
 
-let email = $state('')
-let password = $state('')
+    let email = '';
+    let password = '';
 
-const handlePasswordLogin = async (event) => {
-    event.preventDefault();
-    signInWithEmailAndPassword(auth, email, password)
-        .then(async () => {
-            await login(auth.currentUser)
-            if ($authUser.isAdmin) {
-                goto('/dashboard')
-            } else {
-                goto('/organizations')
-            }
-        })
-        .catch((error) => {
-            if (error.code == "auth/invalid-credential") {
-                alert("Credenciais inválidas, por favor tente novamente.")
-            } else {
-                alert(error.code + ' ' + error.message)
-            }
-        });
-}
-
+    const handlePasswordLogin = async (event) => {
+        event.preventDefault();
+        signInWithEmailAndPassword(auth, email, password)
+            .then(async () => {
+                await login(auth.currentUser);
+                if ($authUser.isAdmin) {
+                    goto('/dashboard');
+                } else {
+                    goto('/organizations');
+                }
+            })
+            .catch((error) => {
+                alert("Erro: " + error.message);
+            });
+    };
 </script>
-<div class="flex items-center justify-center md:h-screen pt:mt-0 dark:bg-gray-900">
-<Section name="login" >
-    <Register href="/">
-        <svelte:fragment slot="top">
-            <!--img class="w-8 h-8 mr-2" src="/images/logo.svg" alt="logo" /-->
-        </svelte:fragment>
-        <div class="p-6 space-y-4 md:space-y-6 sm:p-8 w-96">
-            <form class="flex flex-col space-y-6" onsubmit={handlePasswordLogin}>
-                <h3 class="text-xl font-medium text-gray-900 dark:text-white p-0">Entrar</h3>
-                <Label class="space-y-2">
-                    <span>Your email</span>
-                    <Input type="email" bind:value="{email}" name="email" placeholder="name@gotuk.com" required />
-                </Label>
-                <Label class="space-y-2">
-                    <span>Your password</span>
-                    <Input type="password" bind:value="{password}" name="password" placeholder="•••••" required />
-                </Label>
-                <div class="flex items-start">
-                    <Checkbox>Remember me</Checkbox>
-                    <a href="/" class="ml-auto text-sm text-blue-700 hover:underline dark:text-blue-500">Forgot password?</a>
-                </div>
-                <Button type="submit" class="w-full1">Sign in</Button>
-                <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Don’t have an account yet? <a href="/account" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up</a>
-                </p>
-            </form>
-        </div>
-    </Register>
-</Section>
-</div>
 
+<style>
+    .login-wrapper {
+        @apply flex items-center justify-center min-h-screen bg-gray-100;
+    }
+    .form-container {
+        @apply bg-white p-8 rounded-lg shadow-lg;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="form-container w-96 text-center">
+        <!-- Logo -->
+        <img src="/applogo.png" alt="GoTuk Logo" class="mx-auto h-16 mb-4" />
+
+        <form class="space-y-6" on:submit={handlePasswordLogin}>
+            <h3 class="text-xl font-medium text-gray-900">Entrar no GoTuk</h3>
+            <div>
+                <Label class="block text-left text-gray-700 font-medium mb-2">
+                    Email
+                </Label>
+                <Input class="input" type="email" bind:value={email} name="email" placeholder="name@gotuk.com" required />
+            </div>
+            <div>
+                <Label class="block text-left text-gray-700 font-medium mb-2">
+                    Senha
+                </Label>
+                <Input class="input" type="password" bind:value={password} name="password" placeholder="•••••" required />
+            </div>
+            <Button type="submit" class="w-full bg-[#E51D45] text-white">Sign in</Button>
+            <p class="text-sm text-gray-500">
+                Não tem uma conta? <a href="/account" class="text-[#E51D45] hover:underline">Criar Conta</a>
+            </p>
+        </form>
+    </div>
+</div>

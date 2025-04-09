@@ -30,14 +30,6 @@
         }
     }
 
-    function generateRandomCode() {
-        return `${randomFourDigits()}-${randomFourDigits()}-${randomFourDigits()}`
-    }
-
-    function randomFourDigits() {
-        return Math.floor(1000 + Math.random() * 9000) // Ensures a 4-digit number
-    }
-
     async function submit(event) {
         event.preventDefault()
 
@@ -53,7 +45,7 @@
                 contactName: contactName,
                 email: email,
                 phone: phone,
-                orgCode: generateRandomCode(),
+                orgCode: '',
                 creationDate: serverTimestamp()
             });
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
