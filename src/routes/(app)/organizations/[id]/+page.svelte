@@ -313,7 +313,7 @@
     async function changeAccountStatus(currentState) {
         const documentRef = doc(db, "organizations", $page.params.id)
         await updateDoc(documentRef,
-            { "orgCode": generateRandomCode() },
+            { "orgCode": currentState ? "" : generateRandomCode() },
             { "isValid": !currentState }
         )
         alertMessage = document.isValid ?  "Account successfully validated" : "Account successfully blocked"
