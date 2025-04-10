@@ -31,6 +31,7 @@
     import { authUser } from '$lib/stores/authUser.js'
     import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages} from "$lib/utils.js";
     import {slide} from "svelte/transition";
+    import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
 
 
     let validateAccountConfirmation = $state(false);
@@ -456,9 +457,7 @@
                         </div>
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        {#if activityCertificateData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
+                        <DocumentStatusIcons status={activityCertificateData?.status} />
                         Comprovativo de Actividade ou Certidão Permanente
                     </span>
                     <div class="mb-6">
@@ -527,9 +526,7 @@
                         </div>
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        {#if licenseRNAATData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
+                        <DocumentStatusIcons status={licenseRNAATData?.status} />
                         Licença RNAAT
                     </span>
                     <div class="mb-6">
@@ -606,9 +603,7 @@
                         </div>
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        {#if civilLiabilityInsuranceData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
+                        <DocumentStatusIcons status={civilLiabilityInsuranceData?.status} />
                         Apólice de Seguro de Responsabilidade Civil
                     </span>
                     <div class="mb-6">
@@ -698,9 +693,7 @@
                 </AccordionItem>
                 <AccordionItem>
                     <span slot="header" class="flex items-center gap-2">
-                        {#if workAccidentInsuranceData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
+                        <DocumentStatusIcons status={workAccidentInsuranceData?.status} />
                         Apólice de Seguro de Acidentes de Trabalho
                     </span>
                     {#if workAccidentInsuranceData?.status}
