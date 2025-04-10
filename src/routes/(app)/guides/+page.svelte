@@ -45,17 +45,17 @@
 <div class="w-full">
 <Table >
     <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-        Guides
+        Guias
     </caption>
     <TableHead>
-        <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Nome</TableHeadCell>
         <TableHeadCell>Email</TableHeadCell>
-        <TableHeadCell>Phone</TableHeadCell>
-        <TableHeadCell>Account Accepted</TableHeadCell>
-        <TableHeadCell>Status</TableHeadCell>
-        <TableHeadCell>Rating</TableHeadCell>
+        <TableHeadCell>Contacto</TableHeadCell>
+        <TableHeadCell>Conta Aceite</TableHeadCell>
+        <TableHeadCell>Estado</TableHeadCell>
+        <TableHeadCell>Classificação</TableHeadCell>
         <TableHeadCell>
-            <span class="sr-only">Ver</span>
+            <span class="sr-only">Opções</span>
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
@@ -64,8 +64,8 @@
                 <TableBodyCell>{user.name}</TableBodyCell>
                 <TableBodyCell>{user.email}</TableBodyCell>
                 <TableBodyCell>{user.phone}</TableBodyCell>
-                <TableBodyCell>{user.accountAccepted ? "Yes" : "No"}</TableBodyCell>
-                <TableBodyCell>{user.accountValidated ? "Ok" : "Blocked"}</TableBodyCell>
+                <TableBodyCell>{user.accountAccepted ? "Sim" : "Não"}</TableBodyCell>
+                <TableBodyCell>{user.accountValidated ? "Ok" : "Não Validado"}</TableBodyCell>
                 <TableBodyCell>{user.rating}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/guides/{user.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>

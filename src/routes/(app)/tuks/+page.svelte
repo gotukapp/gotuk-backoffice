@@ -100,18 +100,18 @@
     <caption class="p-5 text-lg font-semibold w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
         <div class="flex justify-between items-center w-full">
             <span>Tuks</span>
-            {#if !$authUser.isAdmin}
-                <Button pill color="light" on:click={() => createForm = true}><CirclePlusSolid class="mr-2" />Add</Button>
+            {#if !$authUser.isAdmin }
+                <Button pill color="light" on:click={() => createForm = true}><CirclePlusSolid class="mr-2" />Adicionar</Button>
             {/if}
         </div>
     </caption>
     <TableHead>
-        <TableHeadCell>License Plate</TableHeadCell>
-        <TableHeadCell>Seats</TableHeadCell>
-        <TableHeadCell>Electric</TableHeadCell>
-        <TableHeadCell>Status</TableHeadCell>
+        <TableHeadCell>Matrícula</TableHeadCell>
+        <TableHeadCell>Lugares</TableHeadCell>
+        <TableHeadCell>Eléctrico</TableHeadCell>
+        <TableHeadCell>Estado</TableHeadCell>
         <TableHeadCell>
-            <span class="sr-only">Edit</span>
+            <span class="sr-only">Opções</span>
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
@@ -120,7 +120,7 @@
                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                 <TableBodyCell>{tuk.seats}</TableBodyCell>
                 <TableBodyCell>{tuk.electric ? "Yes" : "No"}</TableBodyCell>
-                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
+                <TableBodyCell>{tuk.isValid ? "Ok" : "Não Validado"}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/tuks/{tuk.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                     <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"

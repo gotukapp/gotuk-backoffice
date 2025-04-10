@@ -249,7 +249,7 @@
                     <span class="font-medium">{alertMessage}</span>
                 </Alert>
             {/if}
-            <Badge border color={tuktukDoc?.isValid ? 'green' : 'red'}>{tuktukDoc?.isValid ? "Ok" : "Blocked"}</Badge>
+            <Badge border color={tuktukDoc?.isValid ? 'green' : 'red'}>{tuktukDoc?.isValid ? "Ok" : "Não Validado"}</Badge>
             <span class="mt-3" style="height: 40px">Dados do Tuk</span>
             <div>
                 <div class="mb-6">

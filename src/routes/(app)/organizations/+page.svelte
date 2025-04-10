@@ -12,7 +12,8 @@
 
     onMount(async () => {
         if (!$authUser.isAdmin) {
-            await goto('/organizations/' + $authUser.user?.organizationRef.id)
+            console.log($authUser.user)
+            await goto('/organizations/' + $authUser.user?.organizationRef)
         }
 
         const unsubscribe = onSnapshot(collection(db, "organizations"), async (snapshot) => {
@@ -59,7 +60,7 @@
         {#each $orgs as org}
             <TableBodyRow>
                 <TableBodyCell>{org.name}</TableBodyCell>
-                <TableBodyCell>{org.isValid ? "Ok" : "Blocked"}</TableBodyCell>
+                <TableBodyCell>{org.isValid ? "Ok" : "Não Validado"}</TableBodyCell>
                 <TableBodyCell>{org.tuksCount}</TableBodyCell>
                 <TableBodyCell>{org.guidesCount}</TableBodyCell>
                 <TableBodyCell>

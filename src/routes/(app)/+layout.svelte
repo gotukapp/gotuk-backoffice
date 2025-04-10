@@ -58,7 +58,7 @@
         {:else}
             {#if $authUser.user?.organizationRef !== undefined}
                 <NavUl>
-                    <NavLi href="/guides" active={true}>Home</NavLi>
+                    <NavLi href="/organization" active={true}>Inicio</NavLi>
                 </NavUl>
             {/if}
         {/if}
@@ -74,17 +74,17 @@
                             <ChartPieSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Trips" href="/trips" on:click={() => activeUrl = '/trips'} active={activeUrl === '/trips'}>
+                    <SidebarItem label="Reservas" href="/trips" on:click={() => activeUrl = '/trips'} active={activeUrl === '/trips'}>
                         <svelte:fragment slot="icon">
                             <MapPinAltSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Guides" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
+                    <SidebarItem label="Guias" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
                         <svelte:fragment slot="icon">
                             <ProfileCardSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Clients" href="/clients" on:click={() => activeUrl = '/clients'} active={activeUrl === '/clients'}>
+                    <SidebarItem label="Clientes" href="/clients" on:click={() => activeUrl = '/clients'} active={activeUrl === '/clients'}>
                         <svelte:fragment slot="icon">
                             <UserSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                         </svelte:fragment>
@@ -99,7 +99,7 @@
                             <TruckSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                         </svelte:fragment>
                     </SidebarItem>
-                    <SidebarItem label="Organizations" href="/organizations" on:click={() => activeUrl = '/organizations'} active={activeUrl === '/organizations'}>
+                    <SidebarItem label="Empresas" href="/organizations" on:click={() => activeUrl = '/organizations'} active={activeUrl === '/organizations'}>
                         <svelte:fragment slot="icon">
                             <StoreSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                         </svelte:fragment>
@@ -112,12 +112,12 @@
                 <SidebarWrapper class="h-full">
                     <SidebarGroup>
                         {#if $authUser.user?.organizationRef !== undefined}
-                            <SidebarItem label="Organization" href="/organizations/{$authUser.user?.organizationRef?.id}" on:click={() => activeUrl = '/organizations'} active={activeUrl.startsWith('/organizations')}>
+                            <SidebarItem label="Empresa" href="/organizations/{$authUser.user?.organizationRef?.id}" on:click={() => activeUrl = '/organizations'} active={activeUrl.startsWith('/organizations')}>
                                 <svelte:fragment slot="icon">
                                     <StoreSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                 </svelte:fragment>
                             </SidebarItem>
-                            <SidebarItem label="Guides" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
+                            <SidebarItem label="Guias" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
                                 <svelte:fragment slot="icon">
                                     <ProfileCardSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                 </svelte:fragment>

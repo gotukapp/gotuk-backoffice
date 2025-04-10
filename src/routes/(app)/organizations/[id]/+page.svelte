@@ -348,7 +348,7 @@
             </Alert>
         {/if}
         <Card size="xl" style="margin-top: 20px">
-            <Badge border color={document?.isValid ? 'green' :'red'}>{document?.isValid ? "Ok" : "Blocked"}</Badge>
+            <Badge border color={document?.isValid ? 'green' :'red'}>{document?.isValid ? "Ok" : "Não Validado"}</Badge>
             <div class="mt-3">
                 <div class="mb-4">
                     <Label for="input-group-1" class="block mb-2">Código</Label>
@@ -813,7 +813,7 @@
                                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                                 <TableBodyCell>{tuk.seats}</TableBodyCell>
                                 <TableBodyCell>{tuk.electric}</TableBodyCell>
-                                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
+                                <TableBodyCell>{tuk.isValid ? "Ok" : "Não Validado"}</TableBodyCell>
                                 <TableBodyCell>
                                     <a href="/tuks/{tuk.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                                 </TableBodyCell>
@@ -843,7 +843,7 @@
                                 <TableBodyCell>{user.name}</TableBodyCell>
                                 <TableBodyCell>{user.email}</TableBodyCell>
                                 <TableBodyCell>{user.phone}</TableBodyCell>
-                                <TableBodyCell>{user.accountValidated ? "Valid" : "Blocked"}</TableBodyCell>
+                                <TableBodyCell>{user.accountValidated ? "Válida" : "Não Validado"}</TableBodyCell>
                                 <TableBodyCell>{user.rating}</TableBodyCell>
                                 <TableBodyCell>
                                     <a href="/guides/{user.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
