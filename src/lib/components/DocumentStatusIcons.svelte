@@ -1,5 +1,5 @@
 <script>
-    import {CheckCircleSolid, FileSearchSolid} from "flowbite-svelte-icons";
+    import {CheckCircleSolid, CloseCircleSolid, FileSearchSolid} from "flowbite-svelte-icons";
 
     export let status;
 </script>
@@ -9,4 +9,7 @@
 {/if}
 {#if status === "pending"}
     <FileSearchSolid color="grey" />
+{/if}
+{#if status === "rejected"}
+    <CloseCircleSolid color="red" />
 {/if}

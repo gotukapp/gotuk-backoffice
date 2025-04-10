@@ -12,7 +12,7 @@
         Accordion,
         Alert
     } from 'flowbite-svelte';
-    import {ArrowLeftOutline, CheckCircleSolid, CloseCircleSolid, ClockSolid, FilePdfSolid} from 'flowbite-svelte-icons';
+    import {ArrowLeftOutline, CheckCircleSolid, FilePdfSolid} from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages} from '$lib/utils.js'
@@ -31,6 +31,8 @@
     import {goto} from "$app/navigation";
     import {authUser} from '$lib/stores/authUser.js'
     import {slide} from "svelte/transition";
+    import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
+    import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
 
     let validateAccountConfirmation = $state(false);
     let showAlert = $state(false);
@@ -288,21 +290,11 @@
             <Accordion style="margin-top: 20px; margin-bottom: 20px">
                 <AccordionItem>
                     {#if vehicleDocument?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(vehicleDocument?.status)}>{vehicleDocument?.status.toUpperCase()}{  (vehicleDocument != null && vehicleDocument.submitDate != null) ? ' - Submetido a: ' + new Date(vehicleDocument.submitDate.seconds * 1000).toLocaleString() : '' }</Badge>
-                        </div>
+                        <DocumentStatusBadge document={vehicleDocument} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        {#if vehicleDocument?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
-                        {#if vehicleDocument?.status === "rejected"}
-                            <CloseCircleSolid color="red" />
-                        {/if}
-                        {#if vehicleDocument?.status === "pending"}
-                            <ClockSolid color="dark" />
-                        {/if}
-                            Documento Único
+                        <DocumentStatusIcons status={vehicleDocument?.status} />
+                        Documento Único
                     </span>
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Documentos</Label>
@@ -368,20 +360,10 @@
                 </AccordionItem>
                 <AccordionItem>
                     {#if insuranceInfo?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(insuranceInfo?.status)}>{insuranceInfo?.status.toUpperCase()}{  (insuranceInfo != null && insuranceInfo.submitDate != null) ? ' - Submetido a: ' + new Date(insuranceInfo.submitDate.seconds * 1000).toLocaleString() : '' }</Badge>
-                        </div>
+                        <DocumentStatusBadge document={insuranceInfo} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        {#if insuranceInfo?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
-                        {#if insuranceInfo?.status === "rejected"}
-                            <CloseCircleSolid color="red" />
-                        {/if}
-                        {#if insuranceInfo?.status === "pending"}
-                            <ClockSolid color="dark" />
-                        {/if}
+                        <DocumentStatusIcons status={insuranceInfo?.status} />
                         Apólice de Seguro do Veículo
                     </span>
                     <div class="mb-6">
@@ -470,16 +452,11 @@
                     {/if}
                 </AccordionItem>
                 <AccordionItem>
+                    {#if personalInsuranceData?.status}
+                        <DocumentStatusBadge document={personalInsuranceData} />
+                    {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        {#if personalInsuranceData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
-                        {#if personalInsuranceData?.status === "rejected"}
-                            <CloseCircleSolid color="red" />
-                        {/if}
-                        {#if personalInsuranceData?.status === "pending"}
-                            <ClockSolid color="dark" />
-                        {/if}
+                        <DocumentStatusIcons status={personalInsuranceData?.status} />
                         Apólice de Seguro de Acidentes Pessoais
                     </span>
                     {#if personalInsuranceData?.status}

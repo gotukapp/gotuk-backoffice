@@ -32,6 +32,7 @@
     import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages} from "$lib/utils.js";
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
+    import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
 
 
     let validateAccountConfirmation = $state(false);
@@ -452,9 +453,7 @@
             <Accordion style="margin-top: 20px; margin-bottom: 20px">
                 <AccordionItem>
                     {#if activityCertificateData?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(activityCertificateData?.status)}>{activityCertificateData?.status.toUpperCase()}</Badge>
-                        </div>
+                        <DocumentStatusBadge document={activityCertificateData} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
                         <DocumentStatusIcons status={activityCertificateData?.status} />
@@ -521,9 +520,7 @@
                 </AccordionItem>
                 <AccordionItem>
                     {#if licenseRNAATData?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(licenseRNAATData?.status)}>{licenseRNAATData?.status.toUpperCase()}</Badge>
-                        </div>
+                        <DocumentStatusBadge document={licenseRNAATData} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
                         <DocumentStatusIcons status={licenseRNAATData?.status} />
@@ -598,9 +595,7 @@
                 </AccordionItem>
                 <AccordionItem>
                     {#if civilLiabilityInsuranceData?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(civilLiabilityInsuranceData?.status)}>{civilLiabilityInsuranceData?.status.toUpperCase()}</Badge>
-                        </div>
+                        <DocumentStatusBadge document={civilLiabilityInsuranceData} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
                         <DocumentStatusIcons status={civilLiabilityInsuranceData?.status} />
@@ -692,6 +687,9 @@
                     {/if}
                 </AccordionItem>
                 <AccordionItem>
+                    {#if workAccidentInsuranceData?.status}
+                        <DocumentStatusBadge document={workAccidentInsuranceData} />
+                    {/if}
                     <span slot="header" class="flex items-center gap-2">
                         <DocumentStatusIcons status={workAccidentInsuranceData?.status} />
                         Apólice de Seguro de Acidentes de Trabalho

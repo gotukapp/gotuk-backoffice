@@ -19,7 +19,9 @@
     import { page } from "$app/stores";
     import { slide } from "svelte/transition";
     import { authUser } from '$lib/stores/authUser.js'
-    import {formatDate, getAllFilesFromFolder, getStatusColor} from "$lib/utils.js";
+    import {formatDate, getAllFilesFromFolder} from "$lib/utils.js";
+    import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
+    import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
 
     let showAlert = $state(false);
     let alertMessage = $state('');
@@ -226,14 +228,10 @@
         <Accordion style="margin-top: 20px; margin-bottom: 20px">
             <AccordionItem>
                 {#if personalData?.status}
-                    <div class="mb-6">
-                        <Badge large color={getStatusColor(personalData?.status)}>{personalData?.status.toUpperCase()}</Badge>
-                    </div>
+                    <DocumentStatusBadge document={personalData} />
                 {/if}
                 <span slot="header" class="flex items-center gap-2">
-                    {#if personalData?.status === "approved"}
-                        <CheckCircleSolid color="green" />
-                    {/if}
+                    <DocumentStatusIcons status={personalData?.status} />
                     Documento de Identificação
                 </span>
                 <div class="mb-6">
@@ -272,14 +270,10 @@
             </AccordionItem>
             <AccordionItem>
                 {#if workAccidentInsuranceData?.status}
-                    <div class="mb-6">
-                        <Badge large color={getStatusColor(workAccidentInsuranceData?.status)}>{workAccidentInsuranceData?.status.toUpperCase()}</Badge>
-                    </div>
+                    <DocumentStatusBadge document={workAccidentInsuranceData} />
                 {/if}
                 <span slot="header" class="flex items-center gap-2">
-                        {#if workAccidentInsuranceData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
+                    <DocumentStatusIcons status={workAccidentInsuranceData?.status} />
                     Apólice de Seguro de Acidentes de Trabalho
                     </span>
                 {#if workAccidentInsuranceData?.useOrganizationInsurance}
@@ -321,14 +315,10 @@
             </AccordionItem>
             <AccordionItem>
                 {#if criminalRecordData?.status}
-                    <div class="mb-6">
-                        <Badge large color={getStatusColor(criminalRecordData?.status)}>{criminalRecordData?.status.toUpperCase()}</Badge>
-                    </div>
+                    <DocumentStatusBadge document={criminalRecordData} />
                 {/if}
                 <span slot="header" class="flex items-center gap-2">
-                        {#if criminalRecordData?.status === "approved"}
-                            <CheckCircleSolid color="green" />
-                        {/if}
+                    <DocumentStatusIcons status={criminalRecordData?.status} />
                     Registo Criminal
                     </span>
                 <div class="mb-6">
