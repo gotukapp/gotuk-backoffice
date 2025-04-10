@@ -9,38 +9,42 @@
     import {SearchSolid} from "flowbite-svelte-icons";
 
     let orgs = writable([]);
+    let unsubscribe;
 
     onMount(async () => {
-        if (!$authUser.isAdmin) {
-            console.log($authUser.user)
-            await goto('/organizations/' + $authUser.user?.organizationRef)
+        if ($authUser.isAdmin) {
+            unsubscribe = onSnapshot(collection(db, "organizations"), async (snapshot) => {
+                const organizations = await Promise.all(snapshot.docs.map(async (docSnap) => {
+                    const orgData = {id: docSnap.id, ...docSnap.data()};
+
+                    // Query for number of Tuks associated with this organization
+                    const tuksQuery = query(collection(db, "tuktuks")
+                        , where("organizationRef", "==", doc(db, "organizations", orgData.id))
+                        , where("disabled", "==", false));
+                    const tuksCount = (await getCountFromServer(tuksQuery)).data().count;
+
+                    // Query for number of Tuks associated with this organization
+                    const guidesQuery = query(collection(db, "users")
+                        , where("organizationRef", "==", doc(db, "organizations", orgData.id))
+                        , where("disabled", "==", false)
+                        , where("guideMode", "==", true));
+                    const guidesCount = (await getCountFromServer(guidesQuery)).data().count;
+
+                    return {...orgData, tuksCount, guidesCount};
+                }));
+
+                orgs.set(organizations);
+            });
         }
 
-        const unsubscribe = onSnapshot(collection(db, "organizations"), async (snapshot) => {
-            const organizations = await Promise.all(snapshot.docs.map(async (docSnap) => {
-                const orgData = { id: docSnap.id, ...docSnap.data() };
-
-                // Query for number of Tuks associated with this organization
-                const tuksQuery = query(collection(db, "tuktuks")
-                    , where("organizationRef", "==", doc(db, "organizations", orgData.id))
-                    , where("disabled", "==", false));
-                const tuksCount = (await getCountFromServer(tuksQuery)).data().count;
-
-                // Query for number of Tuks associated with this organization
-                const guidesQuery = query(collection(db, "users")
-                    , where("organizationRef", "==", doc(db, "organizations", orgData.id))
-                    , where("disabled", "==", false)
-                    , where("guideMode", "==", true));
-                const guidesCount = (await getCountFromServer(guidesQuery)).data().count;
-
-                return { ...orgData, tuksCount, guidesCount };
-            }));
-
-            orgs.set(organizations);
-        });
-
-        return () => unsubscribe(); // Cleanup on unmount
+        return () => unsubscribe ?? unsubscribe(); // Cleanup on unmount
     });
+
+    $: {
+        if ($authUser && !$authUser.isAdmin && $authUser.user?.organizationRef?.id) {
+            goto('/organizations/' + $authUser.user.organizationRef.id);
+        }
+    }
 </script>
 <div class="w-full">
 <Table >
@@ -60,7 +64,7 @@
         {#each $orgs as org}
             <TableBodyRow>
                 <TableBodyCell>{org.name}</TableBodyCell>
-                <TableBodyCell>{org.isValid ? "Ok" : "Não Validado"}</TableBodyCell>
+                <TableBodyCell>{org.isValid ? "Ok" : "Blockedo"}</TableBodyCell>
                 <TableBodyCell>{org.tuksCount}</TableBodyCell>
                 <TableBodyCell>{org.guidesCount}</TableBodyCell>
                 <TableBodyCell>

@@ -120,7 +120,7 @@
                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                 <TableBodyCell>{tuk.seats}</TableBodyCell>
                 <TableBodyCell>{tuk.electric ? "Yes" : "No"}</TableBodyCell>
-                <TableBodyCell>{tuk.isValid ? "Ok" : "Não Validado"}</TableBodyCell>
+                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/tuks/{tuk.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                     <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"

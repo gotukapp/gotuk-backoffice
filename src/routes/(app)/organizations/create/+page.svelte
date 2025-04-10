@@ -14,6 +14,10 @@
     let email = ''
     let vatError = false
 
+    let showSuccess = false
+    let newOrgId = '';
+
+
     onMount(() => {
     });
 
@@ -51,17 +55,21 @@
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
                 organizationRef: docRef
             })
-            await goto('/organizations/' + docRef.id)
+            newOrgId = docRef.id;
+            showSuccess = true;
         } else {
             form.reportValidity()
         }
+    }
 
-
+    function continueToOrganization() {
+        goto('/organizations/' + newOrgId);
     }
 </script>
 <div class="w-full" style="margin: 20px">
     <Card size="xl" style="margin-top: 20px">
-        <span style="height: 40px">Registar Empresa</span>
+        {#if !showSuccess}
+            <span style="height: 40px">Registar Empresa</span>
             <form on:submit={submit}>
                 <div>
                     <div class="mb-6">
@@ -100,6 +108,15 @@
                 </div>
                 <Button type="submit">Submeter</Button>
             </form>
+        {/if}
+
+        {#if showSuccess}
+            <div class="text-center p-6">
+                <h2 class="text-2xl font-bold text-green-600">✅ Registro Concluído</h2>
+                <p class="text-gray-700 mt-2">A empresa foi registada com sucesso.</p>
+                <Button on:click={continueToOrganization} class="mt-4 bg-[#E51D45] text-white">Continuar</Button>
+            </div>
+        {/if}
     </Card>
 </div>
 <style>

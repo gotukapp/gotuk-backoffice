@@ -23,7 +23,7 @@
     async function signOut() {
         await auth.signOut()
         logout()
-        await goto('/login')
+        goto('/login')
     }
 </script>
 <div class="flex flex-col h-dvh">

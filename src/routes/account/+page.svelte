@@ -3,14 +3,17 @@
     import { getFirestore, doc, setDoc } from "firebase/firestore";
     import { goto } from "$app/navigation";
     import { auth } from '$lib';
-    import { Button, Input, Label } from 'flowbite-svelte';
+    import {Button, Input, Label, Spinner} from 'flowbite-svelte';
+    import {login} from '$lib/stores/authUser.js'
 
     let name = "";
     let email = "";
     let password = "";
     let message = "";
+    let creatingAccount = false;
 
     async function handleRegister(event) {
+        creatingAccount = true;
         const db = getFirestore();
         event.preventDefault();
         try {
@@ -23,11 +26,13 @@
                 name: name,
                 isAdmin: false,
             });
+            await login(auth.currentUser);
             message = "Account created successfully!";
             goto("/organizations/create");
         } catch (error) {
             message = `Error: ${error.message}`;
         }
+        creatingAccount = false;
     }
 </script>
 
@@ -68,7 +73,12 @@
                 </Label>
                 <Input class="input" type="password" bind:value={password} name="password" placeholder="•••••" required />
             </div>
-            <Button type="submit" class="w-full bg-[#E51D45] text-white">Criar Conta</Button>
+            {#if !creatingAccount}
+                <Button type="submit" class="w-full bg-[#E51D45] text-white">Criar Conta</Button>
+            {/if}
+            {#if creatingAccount}
+                <Spinner />
+            {/if}
             <p class="text-sm text-gray-500">
                 Já tem uma conta? <a href="/login" class="text-[#E51D45] hover:underline">Entrar</a>
             </p>

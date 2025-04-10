@@ -162,10 +162,10 @@
                 unsubscribeTuks();
                 unsubscribeUsers();
 
-                unsubscribeActivityCertificateDocuments();
-                unsubscribeLicenseRNAATDocuments();
-                unsubscribeWorkAccidentDocuments();
-                unsubscribeCivilLiabilityDocuments();
+                unsubscribeActivityCertificateDocuments ?? unsubscribeActivityCertificateDocuments();
+                unsubscribeLicenseRNAATDocuments ?? unsubscribeLicenseRNAATDocuments();
+                unsubscribeWorkAccidentDocuments ?? unsubscribeWorkAccidentDocuments();
+                unsubscribeCivilLiabilityDocuments ?? unsubscribeCivilLiabilityDocuments();
             }
         } catch (e) {
             error = "Erro ao carregar documento: " + e.message;
@@ -331,8 +331,11 @@
     }
 </script>
 <div class="w-full" style="margin: 20px">
-    <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4" /></Button>
-
+    {#if $authUser.isAdmin}
+        <div class="mb-4">
+            <Button outline color="dark" size="xs" on:click={() => history.back()}><ArrowLeftOutline class="w-4 h-4"/></Button>
+        </div>
+    {/if}
     {#if loading}
         <p style="margin-top: 20px"><Spinner/> Loading Organization...</p>
     {:else if error}
@@ -347,8 +350,8 @@
                 <span class="font-medium">{alertMessage}</span>
             </Alert>
         {/if}
-        <Card size="xl" style="margin-top: 20px">
-            <Badge border color={document?.isValid ? 'green' :'red'}>{document?.isValid ? "Ok" : "Não Validado"}</Badge>
+        <Card size="xl">
+            <Badge border color={document?.isValid ? 'green' :'red'}>{document?.isValid ? "Ok" : "Blocked"}</Badge>
             <div class="mt-3">
                 <div class="mb-4">
                     <Label for="input-group-1" class="block mb-2">Código</Label>
@@ -813,7 +816,7 @@
                                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                                 <TableBodyCell>{tuk.seats}</TableBodyCell>
                                 <TableBodyCell>{tuk.electric}</TableBodyCell>
-                                <TableBodyCell>{tuk.isValid ? "Ok" : "Não Validado"}</TableBodyCell>
+                                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                                 <TableBodyCell>
                                     <a href="/tuks/{tuk.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>
                                 </TableBodyCell>
@@ -843,7 +846,7 @@
                                 <TableBodyCell>{user.name}</TableBodyCell>
                                 <TableBodyCell>{user.email}</TableBodyCell>
                                 <TableBodyCell>{user.phone}</TableBodyCell>
-                                <TableBodyCell>{user.accountValidated ? "Válida" : "Não Validado"}</TableBodyCell>
+                                <TableBodyCell>{user.accountValidated ? "Ok" : "Blocked"}</TableBodyCell>
                                 <TableBodyCell>{user.rating}</TableBodyCell>
                                 <TableBodyCell>
                                     <a href="/guides/{user.id}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Ver</a>

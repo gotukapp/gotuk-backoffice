@@ -130,7 +130,7 @@
             && $authUser.user !== null
             && tuktukDoc !== null
             && $authUser.user.organizationRef.path !== tuktukDoc.organizationRef.path) {
-            await goto('/tuks')
+            goto('/tuks')
         }
     })
 
@@ -249,7 +249,7 @@
                     <span class="font-medium">{alertMessage}</span>
                 </Alert>
             {/if}
-            <Badge border color={tuktukDoc?.isValid ? 'green' : 'red'}>{tuktukDoc?.isValid ? "Ok" : "Não Validado"}</Badge>
+            <Badge border color={tuktukDoc?.isValid ? 'green' : 'red'}>{tuktukDoc?.isValid ? "Ok" : "Blocked"}</Badge>
             <span class="mt-3" style="height: 40px">Dados do Tuk</span>
             <div>
                 <div class="mb-6">

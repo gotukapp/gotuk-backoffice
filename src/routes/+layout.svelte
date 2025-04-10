@@ -10,19 +10,19 @@
         const user = await data.getAuthUser();
         const loggedIn = !!user && user?.emailVerified;
         if (!loggedIn && auth.currentUser === null) {
-            await goto('/login');
+            goto('/login');
         } else {
             await login(user)
             if ($authUser.isAdmin) {
                 if (data.url.length === 0) {
-                    await goto('/dashboard');
+                    goto('/dashboard');
                 }
             } else {
                 if ($authUser.user?.organizationRef === undefined) {
-                    await goto('/organizations/create')
+                    goto('/organizations/create')
                 } else {
                     if (data.url.length === 0) {
-                        await goto('/organizations/' + $authUser.user?.organizationRef.id)
+                        goto('/organizations/' + $authUser.user?.organizationRef.id)
                     }
                 }
             }
