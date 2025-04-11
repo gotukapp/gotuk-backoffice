@@ -195,7 +195,6 @@
                         <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">{guide.rating} out of 5
                         </p>
                     </Rating>
-                    <a href="/" class="text-sm font-medium text-gray-900 underline hover:no-underline dark:text-white"> 73 reviews </a>
                 </div>
                 {#if $authUser.isAdmin && guide.accountAccepted}
                     <div class="mb-6">
