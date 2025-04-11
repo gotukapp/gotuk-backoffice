@@ -1,22 +1,24 @@
 <script>
     import {Modal, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
-    import {collection, doc, getDocs, query, updateDoc, where} from "firebase/firestore";
+    import {collection, doc, onSnapshot, query, updateDoc, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {authUser} from '$lib/stores/authUser.js'
     import {SearchSolid, TrashBinSolid} from "flowbite-svelte-icons";
+    import {writable} from "svelte/store";
 
-    let users = $state([])
+    let users = writable([]);
     onMount(async () => {
         const firebaseUser = $authUser.user
-        if (firebaseUser !== null) {
-            const q = firebaseUser.isAdmin ?
-                query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false)) :
-                query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false), where("organizationRef", "==", firebaseUser.organizationRef))
+        const q = firebaseUser?.isAdmin ?
+            query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false)) :
+            query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false), where("organizationRef", "==", firebaseUser?.organizationRef))
 
-            const querySnapshot = await getDocs(q);
-            users = querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        }
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            users.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        });
+
+        return () => unsubscribe(); //
     });
 
     let isConfirmOpen = $state(null);
@@ -59,7 +61,7 @@
         </TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
-        {#each users as user}
+        {#each $users as user}
             <TableBodyRow>
                 <TableBodyCell>{user.name}</TableBodyCell>
                 <TableBodyCell>{user.email}</TableBodyCell>
