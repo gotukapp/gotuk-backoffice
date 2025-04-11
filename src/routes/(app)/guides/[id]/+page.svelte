@@ -162,7 +162,7 @@
             <div class="mt-3">
                 <div class="row">
                     <div class="mb-4" style="float: left; width: 85%">
-                        <Label for="input-group-1" class="block mb-2">Name</Label>
+                        <Label for="input-group-1" class="block mb-2">Nome</Label>
                         <div class="flex items-center space-x-2">
                             <div id="insurance-company" class="readonly-input">{guide.name}</div>
                         </div>
@@ -182,15 +182,15 @@
                     <Input id="name" bind:value={guide.email} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Phone</Label>
+                    <Label for="input-group-1" class="block mb-2">Contacto</Label>
                     <Input id="name" bind:value={guide.phone} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Languages</Label>
+                    <Label for="input-group-1" class="block mb-2">Idiomas Falados</Label>
                     <Input id="name" value={guide.language != null ? guide.language.toString().toUpperCase() : ''} readonly/>
                 </div>
                 <div class="mb-6">
-                    <Label for="input-group-1" class="block mb-2">Rating</Label>
+                    <Label for="input-group-1" class="block mb-2">Classificação</Label>
                     <Rating id="example-3" total={5} rating={guide.rating}>
                         <p slot="text" class="ms-2 text-sm font-medium text-gray-500 dark:text-gray-400">{guide.rating} out of 5
                         </p>
@@ -223,7 +223,7 @@
             </div>
         </Card>
         <Card size="xl" style="margin-top: 20px">
-        <p><strong>Submit Date:</strong>{  (documents != null && documents.submitDate != null) ? new Date(documents.submitDate.seconds * 1000).toLocaleString() : '' }</p>
+        <p><strong>Submetido a:</strong>{  (documents != null && documents.submitDate != null) ? new Date(documents.submitDate.seconds * 1000).toLocaleString() : '' }</p>
         <Accordion style="margin-top: 20px; margin-bottom: 20px">
             <AccordionItem>
                 {#if personalData?.status}
