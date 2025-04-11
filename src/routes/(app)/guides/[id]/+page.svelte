@@ -210,12 +210,12 @@
                 {/if}
                 {#if !$authUser.isAdmin  && !guide.accountAccepted}
                     <div class="mb-6">
-                        <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{"Accept Account"}</Button>
-                        <Modal title="Accept Account" bind:open={validateAccountConfirmation} autoclose>
-                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Are you sure you want to accept this account.</p>
+                        <Button pill color="light" style="margin-top: 10px" on:click={() => (validateAccountConfirmation = true)}>{"Aceitar Conta"}</Button>
+                        <Modal title="Aceitar Conta" bind:open={validateAccountConfirmation} autoclose>
+                            <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">Tem a certeza de que pretende aceitar esta conta?</p>
                             <svelte:fragment slot="footer">
-                                <Button on:click={() => acceptAccount()}>Yes</Button>
-                                <Button color="alternative">No</Button>
+                                <Button on:click={() => acceptAccount()}>Sim</Button>
+                                <Button color="alternative">Não</Button>
                             </svelte:fragment>
                         </Modal>
                     </div>
