@@ -28,6 +28,7 @@
 		"@sveltejs/adapter-cloudflare": "^5.0.1",
 		"axios": "^1.5.0",
 		"firebase": "^11.0.1",
-		"flowbite-svelte-blocks": "^1.1.4"
+		"flowbite-svelte-blocks": "^1.1.4",
+		"svelte-i18n": "^4.0.1"
 	}
 }

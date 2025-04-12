@@ -11,6 +11,7 @@
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
     import {logout, authUser} from '$lib/stores/authUser.js'
+    import { _ } from 'svelte-i18n';
 
     let spanClass = 'flex-1 ms-3 whitespace-nowrap';
     let {data, children} = $props()
@@ -44,7 +45,7 @@
                 <span class="block text-sm">{user.displayName}</span>
                 <span class="block truncate text-sm font-medium">{user.email}</span>
             </DropdownHeader>
-            <DropdownItem>Settings</DropdownItem>
+            <DropdownItem on:click={() => goto("/settings")}> Settings</DropdownItem>
             <DropdownDivider />
             <DropdownItem on:click={signOut}>Sign out</DropdownItem>
         </Dropdown>
@@ -53,7 +54,7 @@
                 <NavLi href="/dashboard" active={true}>Home</NavLi>
                 <NavLi href="/FAQs">FAQs</NavLi>
                 <NavLi href="https://gotuk.freshdesk.com/" target="_blank">Tickets</NavLi>
-                <NavLi href="/contact">Contact</NavLi>
+                <NavLi href="/contact">{$_('contacts')}</NavLi>
             </NavUl>
         {:else}
             {#if $authUser.user?.organizationRef !== undefined}
