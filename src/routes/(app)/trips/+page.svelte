@@ -4,12 +4,16 @@
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {writable} from "svelte/store";
+    import {authUser} from '$lib/stores/authUser.js'
 
     let items = writable([]);
     let searchQuery = $state('');
     let order = '';
 
     onMount(() => {
+        const firebaseUser = $authUser.user
+        if (!firebaseUser?.isAdmin) return;
+
         const q = query(collection(db, "trips"), orderBy("creationDate", "desc"));
 
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {

@@ -16,9 +16,14 @@
     let spanClass = 'flex-1 ms-3 whitespace-nowrap';
     let {data, children} = $props()
     let activeUrl = $state('');
+    let faqUrl = $state('');
 
     onMount(async () => {
+        let lang = navigator.language.slice(0, 2).toUpperCase() || 'EN';
+
         activeUrl = $page.url.pathname;
+        faqUrl = lang === 'PT' ? 'https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/documents%2FFAQs_Orgs_PT.pdf?alt=media&token=174e12ec-9b2e-4956-a26c-00d8271c5fe9'
+            : 'https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/documents%2FFAQs_Orgs_EN.pdf?alt=media&token=5ababce4-73f4-4af6-9e9a-f09704659756'
     })
 
     async function signOut() {
@@ -52,14 +57,16 @@
         {#if $authUser.isAdmin === true}
             <NavUl>
                 <NavLi href="/dashboard" active={true}>Home</NavLi>
-                <NavLi href="/FAQs">FAQs</NavLi>
+                <NavLi href={faqUrl} target="_blank">FAQs</NavLi>
                 <NavLi href="https://gotuk.freshdesk.com/" target="_blank">Tickets</NavLi>
-                <NavLi href="/contact">{$_('contacts')}</NavLi>
+                <NavLi href="/contacts">{$_('contacts')}</NavLi>
             </NavUl>
         {:else}
             {#if $authUser.user?.organizationRef !== undefined}
                 <NavUl>
                     <NavLi href="/organization" active={true}>Inicio</NavLi>
+                    <NavLi href={faqUrl} target="_blank">FAQs</NavLi>
+                    <NavLi href="/contacts">{$_('contacts')}</NavLi>
                 </NavUl>
             {/if}
         {/if}
