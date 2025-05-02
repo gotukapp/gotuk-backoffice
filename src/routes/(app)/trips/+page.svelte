@@ -1,6 +1,15 @@
 <script>
-    import {Input, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
-    import {collection, getDoc, query, orderBy, onSnapshot} from "firebase/firestore";
+    import {
+        Input,
+        Table,
+        TableBody,
+        TableBodyCell,
+        TableBodyRow,
+        TableHead,
+        TableHeadCell,
+        Toggle
+    } from 'flowbite-svelte';
+    import {collection, getDoc, onSnapshot, orderBy, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {writable} from "svelte/store";
@@ -9,14 +18,26 @@
     let items = writable([]);
     let searchQuery = $state('');
     let order = '';
+    let pendingStatusSelected = $state(true);
+    let bookedStatusSelected = $state(true);
+    let startedStatusSelected = $state(true);
+    let reschedulingStatusSelected = $state(true);
+    let canceledStatusSelected = $state(false);
+    let finishedStatusSelected = $state(false);
 
-    onMount(() => {
-        const firebaseUser = $authUser.user
-        if (!firebaseUser?.isAdmin) return;
+    function fetchTrips() {
+        let statusFilter = [];
 
-        const q = query(collection(db, "trips"), orderBy("creationDate", "desc"));
+        if (pendingStatusSelected) statusFilter.push("pending");
+        if (bookedStatusSelected) statusFilter.push("booked");
+        if (startedStatusSelected) statusFilter.push("started");
+        if (reschedulingStatusSelected) statusFilter.push("rescheduling");
+        if (canceledStatusSelected) statusFilter.push("canceled");
+        if (finishedStatusSelected) statusFilter.push("finished");
 
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+        const q = statusFilter.length === 0 ? query(collection(db, "trips"), orderBy("creationDate", "desc")) : query(collection(db, "trips"), where("status", "in", statusFilter), orderBy("creationDate", "desc"))
+
+        return onSnapshot(q, async (querySnapshot) => {
             const result = await Promise.all(
                 querySnapshot.docs.map(async (postDoc) => {
                     const postData = postDoc.data();
@@ -41,6 +62,13 @@
 
             items.set(result);
         });
+    }
+
+    onMount(() => {
+        const firebaseUser = $authUser.user
+        if (!firebaseUser?.isAdmin) return;
+
+        const unsubscribe = fetchTrips();
 
         return () => unsubscribe();
     });
@@ -89,12 +117,22 @@
     }
 </script>
 <div class="w-full">
-<Input
-        type="text"
-        bind:value={searchQuery}
-        placeholder="Search"
-        style="margin-top: 20px; margin-bottom: 20px"
-/>
+    <div class="px-4 my-5">
+        <Input
+                type="text"
+                bind:value={searchQuery}
+                placeholder="Search"
+        />
+    </div>
+    <div class="flex items-center gap-x-4 mb-4 px-4 ">
+        <span>Filtro por estado:</span>
+        <Toggle bind:checked={pendingStatusSelected} on:change={() => fetchTrips()}>Pending</Toggle>
+        <Toggle bind:checked={reschedulingStatusSelected} on:change={() => fetchTrips()}>Rescheduling</Toggle>
+        <Toggle bind:checked={bookedStatusSelected} on:change={() => fetchTrips()}>Booked</Toggle>
+        <Toggle bind:checked={startedStatusSelected} on:change={() => fetchTrips()}>Started</Toggle>
+        <Toggle bind:checked={finishedStatusSelected} on:change={() => fetchTrips()}>Finished</Toggle>
+        <Toggle bind:checked={canceledStatusSelected} on:change={() => fetchTrips()}>Canceled</Toggle>
+    </div>
 <Table placeholder="Search by maker name" hoverable={true}>
     <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
         Trips
