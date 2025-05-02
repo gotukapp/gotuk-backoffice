@@ -4,7 +4,7 @@
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {authUser} from '$lib/stores/authUser.js'
-    import {SearchSolid, TrashBinSolid} from "flowbite-svelte-icons";
+    import {SearchSolid, TrashBinSolid, CloseCircleSolid} from "flowbite-svelte-icons";
     import {writable} from "svelte/store";
 
     let users = writable([]);
@@ -21,13 +21,9 @@
         return () => unsubscribe(); //
     });
 
-    let isConfirmOpen = $state(null);
+    let isDeleteConfirmOpen = $state(null);
+    let isExcludeConfirmOpen = $state(null);
     let selectedGuideId = null;
-
-    function openConfirmDialog(guideId) {
-        selectedGuideId = guideId;
-        isConfirmOpen = true;
-    }
 
     async function disableGuide()
     {
@@ -41,7 +37,23 @@
             console.log(`Set guide disabled: ${selectedGuideId}`);
         }
         selectedGuideId = null;
-        isConfirmOpen = false;
+        isDeleteConfirmOpen = false;
+    }
+
+    async function excludeGuide()
+    {
+        if (selectedGuideId) {
+            await updateDoc(doc(db, "users", selectedGuideId),
+                {
+                    accountValidated: false,
+                    accountAccepted: false,
+                    organizationRef: null
+                }
+            )
+            console.log(`Set guide disabled: ${selectedGuideId}`);
+        }
+        selectedGuideId = null;
+        isExcludeConfirmOpen = false;
     }
 </script>
 <div class="w-full">
@@ -71,18 +83,39 @@
                 <TableBodyCell>{user.rating}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/guides/{user.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
-                    <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"
-                            onclick={() => { openConfirmDialog(user.id) }}>
-                        <TrashBinSolid />
-                    </button>
+                    {#if $authUser.isAdmin}
+                        <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"
+                                onclick={() => {
+                                    selectedGuideId = user.id;
+                                    isDeleteConfirmOpen = true;
+                                }}>
+                            <TrashBinSolid />
+                        </button>
+                    {/if}
+                    {#if !$authUser.isAdmin}
+                        <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"
+                                onclick={() => {
+                                    selectedGuideId = user.id;
+                                    isExcludeConfirmOpen = true;
+                                }}>
+                            <CloseCircleSolid />
+                        </button>
+                    {/if}
                 </TableBodyCell>
             </TableBodyRow>
         {/each}
-        <Modal title="Apagar Guia" bind:open={isConfirmOpen} autoclose={false}>
+        <Modal title="Apagar Guia" bind:open={isDeleteConfirmOpen} autoclose={false}>
             <p class="text-base text-gray-600">Tem a certeza que quer apagar este guia?</p>
             <svelte:fragment slot="footer">
                 <button class="bg-red-600 text-white px-4 py-2 rounded" onclick={disableGuide}>Sim</button>
-                <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded" onclick={() => isConfirmOpen = false}>Não</button>
+                <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded" onclick={() => isDeleteConfirmOpen = false}>Não</button>
+            </svelte:fragment>
+        </Modal>
+        <Modal title="Excluir Guia" bind:open={isExcludeConfirmOpen} autoclose={false}>
+            <p class="text-base text-gray-600">Tem a certeza que quer excluir este guia da sua empresa?</p>
+            <svelte:fragment slot="footer">
+                <button class="bg-red-600 text-white px-4 py-2 rounded" onclick={excludeGuide()}>Sim</button>
+                <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded" onclick={() => isExcludeConfirmOpen = false}>Não</button>
             </svelte:fragment>
         </Modal>
     </TableBody>
