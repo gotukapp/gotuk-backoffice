@@ -1,4 +1,7 @@
 {
   "contacts": "Contactos",
-  "contactUs": "Contacte-nos"
+  "contactUs": "Contacte-nos",
+  "home": "Início",
+  "logout": "Sair",
+  "settings": "Configurações"
 }

@@ -1,4 +1,7 @@
 {
   "contacts": "Contacts",
-  "contactUs": "Contact Us"
+  "contactUs": "Contact Us",
+  "home": "Home",
+  "logout": "Logout",
+  "settings": "Settings"
 }

@@ -50,13 +50,13 @@
                 <span class="block text-sm">{user.displayName}</span>
                 <span class="block truncate text-sm font-medium">{user.email}</span>
             </DropdownHeader>
-            <DropdownItem on:click={() => goto("/settings")}> Settings</DropdownItem>
+            <DropdownItem on:click={() => goto("/settings")}>{$_('settings')}</DropdownItem>
             <DropdownDivider />
-            <DropdownItem on:click={signOut}>Sign out</DropdownItem>
+            <DropdownItem on:click={signOut}>{$_('logout')}</DropdownItem>
         </Dropdown>
         {#if $authUser.isAdmin === true}
             <NavUl>
-                <NavLi href="/dashboard" active={true}>Home</NavLi>
+                <NavLi href="/dashboard" active={true}>{$_('home')}</NavLi>
                 <NavLi href={faqUrl} target="_blank">FAQs</NavLi>
                 <NavLi href="https://gotuk.freshdesk.com/" target="_blank">Tickets</NavLi>
                 <NavLi href="/contacts">{$_('contacts')}</NavLi>
@@ -64,7 +64,7 @@
         {:else}
             {#if $authUser.user?.organizationRef !== undefined}
                 <NavUl>
-                    <NavLi href="/organization" active={true}>Inicio</NavLi>
+                    <NavLi href="/organization" active={true}>{$_('home')}</NavLi>
                     <NavLi href={faqUrl} target="_blank">FAQs</NavLi>
                     <NavLi href="/contacts">{$_('contacts')}</NavLi>
                 </NavUl>

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import { signInWithEmailAndPassword } from 'firebase/auth';
     import { goto } from '$app/navigation';
     import { auth } from '$lib';
@@ -41,7 +40,7 @@
         <img src="/applogo.png" alt="GoTuk Logo" class="mx-auto h-16 mb-4" />
 
         <form class="space-y-6" on:submit={handlePasswordLogin}>
-            <h3 class="text-xl font-medium text-gray-900">GoTuk</h3>
+            <h3 class="text-xl font-medium text-gray-900">GoTuk - Empresas</h3>
             <div>
                 <Label class="block text-left text-gray-700 font-medium mb-2">
                     Email
