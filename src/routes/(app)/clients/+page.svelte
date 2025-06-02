@@ -14,7 +14,15 @@
 
         let userQuery = query(collection(db, "users"), where("clientMode", "==", true));
         const querySnapshot = await getDocs(userQuery);
-        users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(user => !user.backoffice).sort((a, b) => {
+            const nameA = a.name?.trim().toLowerCase() || '';
+            const nameB = b.name?.trim().toLowerCase() || '';
+
+            if (!nameA && nameB) return 1;
+            if (nameA && !nameB) return -1;
+
+            return nameA.localeCompare(nameB);
+        });
     });
 </script>
 <div class="w-full">
