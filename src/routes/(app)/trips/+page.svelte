@@ -14,6 +14,7 @@
     import {db} from '$lib'
     import {writable} from "svelte/store";
     import {authUser} from '$lib/stores/authUser.js'
+    import {goto} from "$app/navigation";
 
     let items = writable([]);
     let searchQuery = $state('');
@@ -66,7 +67,9 @@
 
     onMount(() => {
         const firebaseUser = $authUser.user
-        if (!firebaseUser?.isAdmin) return;
+        if (!firebaseUser?.isAdmin) {
+            goto('/organizations');
+        }
 
         const unsubscribe = fetchTrips();
 

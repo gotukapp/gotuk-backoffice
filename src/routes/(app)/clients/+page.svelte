@@ -3,8 +3,15 @@
     import {collection, getDocs, query, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
+    import {authUser} from '$lib/stores/authUser.js'
+    import {goto} from "$app/navigation";
     let users = $state([])
     onMount(async () => {
+        const firebaseUser = $authUser.user
+        if (!firebaseUser?.isAdmin) {
+            await goto('/organizations');
+        }
+
         let userQuery = query(collection(db, "users"), where("clientMode", "==", true));
         const querySnapshot = await getDocs(userQuery);
         users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

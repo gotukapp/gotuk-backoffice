@@ -4,6 +4,8 @@
     import {onMount} from "svelte";
     import {collection, getCountFromServer, where, query, getDocs} from "firebase/firestore";
     import {db} from "$lib";
+    import {authUser} from '$lib/stores/authUser.js'
+    import {goto} from "$app/navigation";
 
     let dropdownOpen = false;
     let tripsByStatus = null;
@@ -12,8 +14,13 @@
     let selectedDateRange = "Last 30 days";
 
     onMount(async () => {
-        await refreshChartOptions();
-        await bookedTripsChart();
+        const firebaseUser = $authUser.user
+        if (firebaseUser?.isAdmin) {
+            await refreshChartOptions();
+            await bookedTripsChart();
+        } else {
+            await goto('/organizations');
+        }
     });
 
     async function refreshChartOptions() {

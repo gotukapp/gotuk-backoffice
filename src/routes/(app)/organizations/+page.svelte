@@ -64,7 +64,7 @@
         {#each $orgs as org}
             <TableBodyRow>
                 <TableBodyCell>{org.name}</TableBodyCell>
-                <TableBodyCell>{org.isValid ? "Ok" : "Blockedo"}</TableBodyCell>
+                <TableBodyCell>{org.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell>{org.tuksCount}</TableBodyCell>
                 <TableBodyCell>{org.guidesCount}</TableBodyCell>
                 <TableBodyCell>

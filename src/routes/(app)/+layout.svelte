@@ -29,7 +29,7 @@
     async function signOut() {
         await auth.signOut()
         logout()
-        goto('/login')
+        await goto('/login')
     }
 </script>
 <div class="flex flex-col h-dvh">
@@ -39,7 +39,7 @@
     {:then user}
         <NavBrand href="/">
             <img src="/applogo.png" class="me-3 h-6 sm:h-9" alt="Logo" />
-            <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">GoTuk</span>
+            <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">GoTuk - {#if $authUser.isAdmin}Backoffice{:else}Empresas{/if}</span>
         </NavBrand>
         <div class="flex items-center md:order-2">
             <Avatar id="avatar-menu" src="https://ui-avatars.com/api/?name={user.displayName}" />

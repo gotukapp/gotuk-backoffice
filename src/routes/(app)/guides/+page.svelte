@@ -1,21 +1,33 @@
 <script>
     import {Modal, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
-    import {collection, doc, onSnapshot, query, updateDoc, where} from "firebase/firestore";
+    import {collection, doc, getDoc, onSnapshot, query, updateDoc, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {authUser} from '$lib/stores/authUser.js'
     import {SearchSolid, TrashBinSolid, CloseCircleSolid} from "flowbite-svelte-icons";
     import {writable} from "svelte/store";
 
+    let orgNames = new Map();
     let users = writable([]);
+
     onMount(async () => {
         const firebaseUser = $authUser.user
         const q = firebaseUser?.isAdmin ?
             query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false)) :
             query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false), where("organizationRef", "==", firebaseUser?.organizationRef))
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            users.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+            const fetchedUsers = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            users.set(fetchedUsers);
+
+            if (firebaseUser?.isAdmin) {
+                await preloadOrganizations(fetchedUsers);
+            }
+
+            users.set(snapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
         });
 
         return () => unsubscribe(); //
@@ -24,6 +36,28 @@
     let isDeleteConfirmOpen = $state(null);
     let isExcludeConfirmOpen = $state(null);
     let selectedGuideId = null;
+
+    async function preloadOrganizations(usersList) {
+        const orgRefs = usersList
+            .map(u => u.organizationRef)
+            .filter(ref => ref && !orgNames.has(ref.id));
+
+        const promises = orgRefs.map(async (ref) => {
+            try {
+                const snap = await getDoc(ref);
+                if (snap.exists()) {
+                    orgNames.set(ref.id, snap.data().name);
+                } else {
+                    orgNames.set(ref.id, "Unknown Org " + ref.id);
+                }
+            } catch (e) {
+                console.error('Error loading organization:', ref.id, e);
+                orgNames.set(ref.id, "Error loading " + ref.id);
+            }
+        });
+
+        await Promise.all(promises);
+    }
 
     async function disableGuide()
     {
@@ -63,7 +97,9 @@
     </caption>
     <TableHead>
         <TableHeadCell>Nome</TableHeadCell>
-        <TableHeadCell>Email</TableHeadCell>
+        {#if $authUser.isAdmin}
+            <TableHeadCell>Empresa</TableHeadCell>
+        {/if}
         <TableHeadCell>Contacto</TableHeadCell>
         <TableHeadCell>Conta Aceite</TableHeadCell>
         <TableHeadCell>Estado</TableHeadCell>
@@ -76,7 +112,15 @@
         {#each $users as user}
             <TableBodyRow>
                 <TableBodyCell>{user.name}</TableBodyCell>
-                <TableBodyCell>{user.email}</TableBodyCell>
+                {#if $authUser.isAdmin}
+                    <TableBodyCell>
+                        {#if user.organizationRef}
+                            <a href="/organizations/{user.organizationRef.id}" class="font-medium text-stone-800 hover:underline dark:text-stone-500">
+                                {orgNames.get(user.organizationRef.id) || 'Loading...'}
+                            </a>
+                        {/if}
+                    </TableBodyCell>
+                {/if}
                 <TableBodyCell>{user.phone}</TableBodyCell>
                 <TableBodyCell>{user.accountAccepted ? "Sim" : "Não"}</TableBodyCell>
                 <TableBodyCell>{user.accountValidated ? "Ok" : "Blocked"}</TableBodyCell>
