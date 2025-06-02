@@ -1,13 +1,14 @@
 <script>
     import {Modal, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell} from 'flowbite-svelte';
-    import {collection, doc, getDoc, onSnapshot, query, updateDoc, where} from "firebase/firestore";
+    import {collection, doc, onSnapshot, query, updateDoc, where} from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {authUser} from '$lib/stores/authUser.js'
     import {SearchSolid, TrashBinSolid, CloseCircleSolid} from "flowbite-svelte-icons";
-    import {writable} from "svelte/store";
+    import {get, writable} from "svelte/store";
+    import {getOrgName} from "$lib/stores/organizations.js";
 
-    let orgNames = new Map();
+    export const orgNames = writable(new Map());
     let users = writable([]);
 
     onMount(async () => {
@@ -16,18 +17,17 @@
             query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false)) :
             query(collection(db, "users"), where("guideMode", "==", true), where("disabled", "==", false), where("organizationRef", "==", firebaseUser?.organizationRef))
 
-        const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedUsers = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
             users.set(fetchedUsers);
 
             if (firebaseUser?.isAdmin) {
-                await preloadOrganizations(fetchedUsers);
+                loadOrganizations();
             }
-
-            users.set(snapshot.docs.map(doc => ({id: doc.id, ...doc.data()})));
         });
 
         return () => unsubscribe(); //
@@ -37,26 +37,21 @@
     let isExcludeConfirmOpen = $state(null);
     let selectedGuideId = null;
 
-    async function preloadOrganizations(usersList) {
-        const orgRefs = usersList
-            .map(u => u.organizationRef)
-            .filter(ref => ref && !orgNames.has(ref.id));
+    async function loadOrganizations() {
+        const currentUsers = get(users);
+        const updatedUsers = [...currentUsers];
 
-        const promises = orgRefs.map(async (ref) => {
+        const promises = updatedUsers.map(async (user) => {
             try {
-                const snap = await getDoc(ref);
-                if (snap.exists()) {
-                    orgNames.set(ref.id, snap.data().name);
-                } else {
-                    orgNames.set(ref.id, "Unknown Org " + ref.id);
-                }
+                user.orgName = await getOrgName(user.organizationRef)
             } catch (e) {
-                console.error('Error loading organization:', ref.id, e);
-                orgNames.set(ref.id, "Error loading " + ref.id);
+                console.error('Error loading organization:', user.organizationRef.id, e);
+                user.orgName = "Error loading " + user.organizationRef.id;
             }
         });
 
         await Promise.all(promises);
+        users.set(updatedUsers);
     }
 
     async function disableGuide()
@@ -116,7 +111,7 @@
                     <TableBodyCell>
                         {#if user.organizationRef}
                             <a href="/organizations/{user.organizationRef.id}" class="font-medium text-stone-800 hover:underline dark:text-stone-500">
-                                {orgNames.get(user.organizationRef.id) || 'Loading...'}
+                                {user.orgName || 'Loading...'}
                             </a>
                         {/if}
                     </TableBodyCell>

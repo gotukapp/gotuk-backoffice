@@ -33,6 +33,7 @@
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
+    import { getOrgName } from '$lib/stores/organizations';
 
     let validateAccountConfirmation = $state(false);
     let showAlert = $state(false);
@@ -81,6 +82,9 @@
             const unsubscribeTuk = onSnapshot(docRef, async (docSnap) => {
                 if (docSnap.exists()) {
                     tuktukDoc = docSnap.data();
+                    if (tuktukDoc.organizationRef) {
+                        tuktukDoc.orgName = await getOrgName(tuktukDoc.organizationRef);
+                    }
 
                     const vehicleInsuranceDocRef = collection(doc(db, "tuktuks", id), "vehicleInsurance");
                     const queryVehicleInsurance = query(vehicleInsuranceDocRef, orderBy("submitDate", "desc"), limit(1));
@@ -258,6 +262,12 @@
                     <Label for="input-group-1" class="block mb-2">License Plate</Label>
                     <div class="flex items-center space-x-2">
                         <div id="insurance-company" class="readonly-input">{tuktukDoc?.licensePlate}</div>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Empresa</Label>
+                    <div class="flex items-center space-x-2">
+                        <div id="insurance-company" class="readonly-input">{tuktukDoc?.orgName}</div>
                     </div>
                 </div>
                 <div class="mb-6">

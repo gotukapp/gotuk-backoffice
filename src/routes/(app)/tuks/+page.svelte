@@ -21,9 +21,11 @@
     } from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
-    import {writable} from "svelte/store";
+    import {get, writable} from "svelte/store";
     import {authUser} from '$lib/stores/authUser.js'
     import {SearchSolid, TrashBinSolid, CirclePlusSolid} from "flowbite-svelte-icons";
+    import {getOrgName} from "$lib/stores/organizations.js";
+
     let tuks = writable([]);
     let createForm = false;
     let isCreating = false;
@@ -31,18 +33,41 @@
     let seats = "4";
     let isElectric = true;
     let licensePlateError = false;
+    export const orgNames = writable(new Map());
 
-    onMount(async () => {
+    onMount(() => {
         const firebaseUser = $authUser.user
         const q = firebaseUser?.isAdmin ?
             query(collection(db, "tuktuks"), where("disabled", "==", false)) :
             query(collection(db, "tuktuks"), where("organizationRef", "==", firebaseUser?.organizationRef), where("disabled", "==", false))
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            tuks.set(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            const fetchedTuks = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+            tuks.set(fetchedTuks);
+
+            if (firebaseUser?.isAdmin) {
+                preloadOrganizations(fetchedTuks);
+            }
         });
 
         return () => unsubscribe(); // Cleanup on unmount
     });
+
+    async function preloadOrganizations() {
+        const currentTuks = get(tuks);
+
+        const promises = currentTuks.map(async (tuk) => {
+            try {
+                tuk.orgName = await getOrgName(tuk.organizationRef)
+            } catch (e) {
+                console.error('Error loading organization:', tuk.organizationRef.id, e);
+                tuk.orgName = "Error loading " + tuk.organizationRef.id;
+            }
+        });
+
+        await Promise.all(promises);
+        tuks.set(currentTuks);
+    }
 
     function validateLicensePlate(event) {
         const plate = event.target.value.toUpperCase().trim();
@@ -107,8 +132,11 @@
     </caption>
     <TableHead>
         <TableHeadCell>Matrícula</TableHeadCell>
-        <TableHeadCell>Lugares</TableHeadCell>
-        <TableHeadCell>Eléctrico</TableHeadCell>
+        {#if $authUser.isAdmin}
+            <TableHeadCell>Empresa</TableHeadCell>
+        {/if}
+        <TableHeadCell class="max-w-[50px]">Lugares</TableHeadCell>
+        <TableHeadCell class="max-w-[50px]">Eléctrico</TableHeadCell>
         <TableHeadCell>Estado</TableHeadCell>
         <TableHeadCell>
             <span class="sr-only">Opções</span>
@@ -118,9 +146,18 @@
         {#each $tuks as tuk}
             <TableBodyRow>
                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
-                <TableBodyCell>{tuk.seats}</TableBodyCell>
-                <TableBodyCell>{tuk.electric ? "Yes" : "No"}</TableBodyCell>
-                <TableBodyCell>{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
+                {#if $authUser.isAdmin}
+                    <TableBodyCell class="max-w-[150px] truncate">
+                        {#if tuk.organizationRef}
+                            <a href="/organizations/{tuk.organizationRef.id}" class="font-medium text-stone-800 hover:underline dark:text-stone-500">
+                                {tuk.orgName || 'Loading...'}
+                            </a>
+                        {/if}
+                    </TableBodyCell>
+                {/if}
+                <TableBodyCell class="max-w-[50px]">{tuk.seats}</TableBodyCell>
+                <TableBodyCell class="max-w-[50px]">{tuk.electric ? "Yes" : "No"}</TableBodyCell>
+                <TableBodyCell class="max-w-[50px]">{tuk.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
                     <a href="/tuks/{tuk.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                     <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"

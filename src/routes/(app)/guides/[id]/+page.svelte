@@ -22,6 +22,7 @@
     import {formatDate, getAllFilesFromFolder} from "$lib/utils.js";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
+    import { getOrgName } from '$lib/stores/organizations';
 
     let showAlert = $state(false);
     let alertMessage = $state('');
@@ -99,6 +100,9 @@
 
             if (guideSnap.exists()) {
                 guide = guideSnap.data();
+                if (guide.organizationRef) {
+                    guide.orgName = await getOrgName(guide.organizationRef);
+                }
 
                 const queryPersonalData = query(collection(doc(db, "users", id), "personalData"), orderBy("submitDate", "desc"), limit(1));
                 unsubscribePersonalDataDocuments = onSnapshot(queryPersonalData, async (querySnapshot) => {
@@ -188,6 +192,10 @@
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Idiomas Falados</Label>
                     <Input id="name" value={guide.language != null ? guide.language.toString().toUpperCase() : ''} readonly/>
+                </div>
+                <div class="mb-6">
+                    <Label for="input-group-1" class="block mb-2">Empresa</Label>
+                    <Input id="name" bind:value={guide.orgName} readonly/>
                 </div>
                 <div class="mb-6">
                     <Label for="input-group-1" class="block mb-2">Classificação</Label>
