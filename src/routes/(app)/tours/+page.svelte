@@ -3,8 +3,17 @@
     import { collection, getDocs } from "firebase/firestore";
     import {onMount} from "svelte";
     import {db} from '$lib'
+    import {authUser} from '$lib/stores/authUser.js'
+    import {goto} from "$app/navigation";
+
     let tours = $state([])
+
     onMount(async () => {
+        const firebaseUser = $authUser.user
+        if (!firebaseUser?.isAdmin) {
+            await goto('/organizations');
+        }
+
         const querySnapshot = await getDocs(collection(db, "tours"));
         tours = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     });
