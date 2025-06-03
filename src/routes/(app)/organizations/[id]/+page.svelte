@@ -29,7 +29,7 @@
     import { page } from "$app/stores";
     import { writable } from "svelte/store";
     import { authUser } from '$lib/stores/authUser.js'
-    import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages} from "$lib/utils.js";
+    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages} from "$lib/utils.js";
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
@@ -598,7 +598,7 @@
                         <DocumentStatusBadge document={civilLiabilityInsuranceData} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        <DocumentStatusIcons status={civilLiabilityInsuranceData?.status} />
+                        <DocumentStatusIcons status={civilLiabilityInsuranceData?.status} expirationDate={civilLiabilityInsuranceData?.expirationDate}/>
                         Apólice de Seguro de Responsabilidade Civil
                     </span>
                     <div class="mb-6">
@@ -691,14 +691,9 @@
                         <DocumentStatusBadge document={workAccidentInsuranceData} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        <DocumentStatusIcons status={workAccidentInsuranceData?.status} />
+                        <DocumentStatusIcons status={workAccidentInsuranceData?.status}  expirationDate={workAccidentInsuranceData?.expirationDate}/>
                         Apólice de Seguro de Acidentes de Trabalho
                     </span>
-                    {#if workAccidentInsuranceData?.status}
-                        <div class="mb-6">
-                            <Badge large color={getStatusColor(workAccidentInsuranceData?.status)}>{workAccidentInsuranceData?.status.toUpperCase()}</Badge>
-                        </div>
-                    {/if}
                     <div class="mb-6">
                         <Label for="input-group-1" class="block mb-2">Companhia de Seguros</Label>
                         <div id="insurance-company" class="readonly-input">{workAccidentInsuranceData?.name}</div>

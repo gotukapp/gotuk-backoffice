@@ -238,7 +238,7 @@
                     <DocumentStatusBadge document={personalData} />
                 {/if}
                 <span slot="header" class="flex items-center gap-2">
-                    <DocumentStatusIcons status={personalData?.status} />
+                    <DocumentStatusIcons status={personalData?.status} expirationDate={personalData?.identificationNumberExpirationDate}/>
                     Documento de Identificação
                 </span>
                 <div class="mb-6">
@@ -280,7 +280,7 @@
                     <DocumentStatusBadge document={workAccidentInsuranceData} />
                 {/if}
                 <span slot="header" class="flex items-center gap-2">
-                    <DocumentStatusIcons status={workAccidentInsuranceData?.status} />
+                    <DocumentStatusIcons status={workAccidentInsuranceData?.status} expirationDate={workAccidentInsuranceData?.expirationDate}/>
                     Apólice de Seguro de Acidentes de Trabalho
                     </span>
                 {#if workAccidentInsuranceData?.useOrganizationInsurance}

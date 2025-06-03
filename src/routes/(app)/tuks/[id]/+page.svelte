@@ -373,7 +373,7 @@
                         <DocumentStatusBadge document={insuranceInfo} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        <DocumentStatusIcons status={insuranceInfo?.status} />
+                        <DocumentStatusIcons status={insuranceInfo?.status} expirationDate={insuranceInfo?.expirationDate} />
                         Apólice de Seguro do Veículo
                     </span>
                     <div class="mb-6">
@@ -466,7 +466,7 @@
                         <DocumentStatusBadge document={personalInsuranceData} />
                     {/if}
                     <span slot="header" class="flex items-center gap-2">
-                        <DocumentStatusIcons status={personalInsuranceData?.status} />
+                        <DocumentStatusIcons status={personalInsuranceData?.status} expirationDate={insuranceInfo?.expirationDate} />
                         Apólice de Seguro de Acidentes Pessoais
                     </span>
                     {#if personalInsuranceData?.status}
