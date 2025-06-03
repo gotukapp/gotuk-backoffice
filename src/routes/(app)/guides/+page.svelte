@@ -7,6 +7,7 @@
     import {SearchSolid, TrashBinSolid, CloseCircleSolid} from "flowbite-svelte-icons";
     import {get, writable} from "svelte/store";
     import {getOrgName} from "$lib/stores/organizations.js";
+    import {sortWithHighlightNews} from "$lib/utils.js";
 
     export const orgNames = writable(new Map());
     let users = writable([]);
@@ -23,7 +24,9 @@
                 ...doc.data()
             }));
 
-            users.set(fetchedUsers);
+            const sortedUsers = sortWithHighlightNews(fetchedUsers);
+
+            users.set(sortedUsers);
 
             if (firebaseUser?.isAdmin) {
                 loadOrganizations();
@@ -105,7 +108,7 @@
     </TableHead>
     <TableBody tableBodyClass="divide-y">
         {#each $users as user}
-            <TableBodyRow>
+            <TableBodyRow class={user.isNew ? 'bg-orange-100' : ''}>
                 <TableBodyCell>{user.name}</TableBodyCell>
                 {#if $authUser.isAdmin}
                     <TableBodyCell>

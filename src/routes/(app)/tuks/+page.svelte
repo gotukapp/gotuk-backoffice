@@ -43,7 +43,39 @@
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedTuks = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
 
-            tuks.set(fetchedTuks);
+            // Get the cutoff date (5 days ago)
+            const fiveDaysAgo = new Date();
+            fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+            const [recentTuks, olderTuks] = fetchedTuks.reduce(
+                ([recent, old], tuk) => {
+                    const createdAt = tuk.creationDate?.toDate?.() || new Date(tuk.creationDate);
+                    if (createdAt >= fiveDaysAgo) {
+                        tuk.isNew = true
+                        recent.push(tuk);
+                    } else {
+                        old.push(tuk);
+                    }
+                    return [recent, old];
+                },
+                [[], []]
+            );
+
+            const sortByName = (a, b) => {
+                const nameA = a.licensePlate?.trim().toLowerCase() || '';
+                const nameB = b.licensePlate?.trim().toLowerCase() || '';
+
+                if (!nameA && nameB) return 1;
+                if (nameA && !nameB) return -1;
+                return nameA.localeCompare(nameB);
+            };
+
+            const sortedTuks = [
+                ...recentTuks.sort(sortByName),
+                ...olderTuks.sort(sortByName)
+            ];
+
+            tuks.set(sortedTuks);
 
             if (firebaseUser?.isAdmin) {
                 preloadOrganizations(fetchedTuks);
@@ -144,7 +176,7 @@
     </TableHead>
     <TableBody tableBodyClass="divide-y">
         {#each $tuks as tuk}
-            <TableBodyRow>
+            <TableBodyRow class={tuk.isNew ? 'bg-orange-100' : ''}>
                 <TableBodyCell>{tuk.licensePlate}</TableBodyCell>
                 {#if $authUser.isAdmin}
                     <TableBodyCell class="max-w-[150px] truncate">

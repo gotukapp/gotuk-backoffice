@@ -7,6 +7,7 @@
     import { authUser } from '$lib/stores/authUser.js'
     import {goto} from "$app/navigation";
     import {SearchSolid} from "flowbite-svelte-icons";
+    import {sortWithHighlightNews} from "$lib/utils.js";
 
     let orgs = writable([]);
     let unsubscribe;
@@ -33,7 +34,9 @@
                     return {...orgData, tuksCount, guidesCount};
                 }));
 
-                orgs.set(organizations);
+                const sortedOrgs = sortWithHighlightNews(organizations);
+
+                orgs.set(sortedOrgs);
             });
         }
 
@@ -62,7 +65,7 @@
     </TableHead>
     <TableBody tableBodyClass="divide-y">
         {#each $orgs as org}
-            <TableBodyRow>
+            <TableBodyRow class={org.isNew ? 'bg-orange-100' : ''}>
                 <TableBodyCell>{org.name}</TableBodyCell>
                 <TableBodyCell>{org.isValid ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell>{org.tuksCount}</TableBodyCell>

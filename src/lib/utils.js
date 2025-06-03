@@ -48,3 +48,37 @@ export async function uploadImages(path, selectedFiles, onProgressUpdate) {
 
     return uploadedUrls
 }
+
+export function sortWithHighlightNews(objectList) {
+    // Get the cutoff date (5 days ago)
+    const fiveDaysAgo = new Date();
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+    const [recentObj, olderObj] = objectList.reduce(
+        ([recent, old], org) => {
+            const createdAt = org.creationDate?.toDate?.() || new Date(org.creationDate);
+            if (createdAt >= fiveDaysAgo) {
+                org.isNew = true
+                recent.push(org);
+            } else {
+                old.push(org);
+            }
+            return [recent, old];
+        },
+        [[], []]
+    );
+
+    const sortByName = (a, b) => {
+        const nameA = a.name?.trim().toLowerCase() || '';
+        const nameB = b.name?.trim().toLowerCase() || '';
+
+        if (!nameA && nameB) return 1;
+        if (nameA && !nameB) return -1;
+        return nameA.localeCompare(nameB);
+    };
+
+    return [
+        ...recentObj.sort(sortByName),
+        ...olderObj.sort(sortByName)
+    ];
+}
