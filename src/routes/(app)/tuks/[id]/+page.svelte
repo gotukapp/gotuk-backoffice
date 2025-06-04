@@ -15,7 +15,7 @@
     import {ArrowLeftOutline, CheckCircleSolid, FilePdfSolid} from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
     import {db} from '$lib'
-    import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages} from '$lib/utils.js'
+    import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages, sendMail} from '$lib/utils.js'
     import {
         collection,
         doc,
@@ -24,8 +24,7 @@
         orderBy,
         query,
         serverTimestamp,
-        setDoc,
-        updateDoc
+        updateDoc, writeBatch
     } from "firebase/firestore";
     import {page} from "$app/stores";
     import {goto} from "$app/navigation";
@@ -152,34 +151,53 @@
 
     async function submitVehicleData() {
         isUploading = true
+        const batch = writeBatch(db);
         const docRef = doc(collection(doc(db, "tuktuks", $page.params.id), "vehicleDocument"))
         await uploadImages(`uploads/tuktuks/${$page.params.id}/vehicleDocument/${docRef.id}`, selectedVehicleInfoFiles, (progress) => { uploadProgress = progress; });
         localPreviews.length = 0
         selectedFiles.length = 0
-        await setDoc(docRef, {
+        batch.set(docRef, {
             status: 'pending',
             submitDate: serverTimestamp()
         });
+        createMailDocument(batch, "Documentos do Veículo")
+        await batch.commit();
         isUploading = false
         editing = false;
     }
 
     async function submit(documentType, name, number, expirationDate, files) {
         isUploading = true
+        const batch = writeBatch(db);
         const docRef = doc(collection(doc(db, "tuktuks", $page.params.id), documentType))
         await uploadImages(`uploads/tuktuks/${$page.params.id}/${documentType}/${docRef.id}`, files, (progress) => { uploadProgress = progress; });
         localPreviews.length = 0
         selectedFiles.length = 0
-        await setDoc(docRef, {
+        batch.set(docRef, {
             name: name,
             number: number,
             expirationDate: expirationDate ? new Date(expirationDate) : expirationDate,
             status: 'pending',
             submitDate: serverTimestamp()
         });
-
+        createMailDocument(batch, documentType)
+        await batch.commit();
         isUploading = false
         editing = false;
+    }
+
+    function createMailDocument(batch, type) {
+        const subject= "Novos Documentos Submetidos para Verificação"
+        const body = `
+                <p>Olá,</p>
+                <p>A empresa <strong>${tuktukDoc.orgName}</strong> enviou novos documentos para verificação.</p>
+                <p>Documentos relativos ao TukTuk de matricula <strong>${tuktukDoc.licensePlate}</strong>.</p>
+                <p><strong>Tipo de Documentos:</strong> ${type}.</p>
+                <p>Para aceder e verificar os documentos submetidos, clique no link abaixo:</p>
+                <p><a href="http://backoffice.gotuk.pt/tuks/${$page.params.id}" target="_blank">Verificar Documentos</a></p>
+            `
+
+        sendMail(batch, subject, body)
     }
 
     function removeImage(index) {

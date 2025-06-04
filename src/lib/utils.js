@@ -1,5 +1,6 @@
 import {getDownloadURL, listAll, ref, uploadBytes, getMetadata} from "firebase/storage";
-import {storage} from "./index.js";
+import {db, storage} from "./index.js";
+import {collection, doc} from "firebase/firestore";
 
 export async function getAllFilesFromFolder(folderPath) {
     const folderRef = ref(storage, folderPath)
@@ -81,4 +82,15 @@ export function sortWithHighlightNews(objectList) {
         ...recentObj.sort(sortByName),
         ...olderObj.sort(sortByName)
     ];
+}
+
+export function sendMail(batch, subject, body) {
+    const mailRef = doc(collection(db, "mail"));
+    batch.set(mailRef, {
+        to: ["support@gotuk.freshdesk.com"],
+        message: {
+            subject: subject,
+            html: body
+        }
+    });
 }

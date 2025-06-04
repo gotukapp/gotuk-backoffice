@@ -29,7 +29,7 @@
     import { page } from "$app/stores";
     import { writable } from "svelte/store";
     import { authUser } from '$lib/stores/authUser.js'
-    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages} from "$lib/utils.js";
+    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages, sendMail} from "$lib/utils.js";
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
@@ -230,23 +230,6 @@
         editingActivityCertificate = false;
     }
 
-    function createMailDocument(batch, orgId, orgName, type) {
-        const mailRef = doc(collection(db, "mail"));
-        batch.set(mailRef, {
-            to: ["suporte@gotuk.pt"],
-            message: {
-                subject: "Novos Documentos Submetidos para Verificação",
-                html: `
-                <p>Olá,</p>
-                <p>A empresa <strong>${orgName}</strong> enviou novos documentos para verificação.</p>
-                <p><strong>Tipo de Documentos:</strong> ${type}.</p>
-                <p>Para aceder e verificar os documentos submetidos, clique no link abaixo:</p>
-                <p><a href="http://backoffice.gotuk.pt/organizations/${orgId}" target="_blank">Verificar Documentos</a></p>
-            `
-            }
-        });
-    }
-
     async function submitLicenseRNAAT() {
         isUploading = true
         const batch = writeBatch(db);
@@ -288,6 +271,19 @@
         createMailDocument(batch, $page.params.id, document?.name, documentType === "civilLiabilityInsurance" ? "Apólice de Seguro de Responsabilidade Civil" : "Apólice de Seguro de Acidentes de Trabalho")
         await batch.commit();
         isUploading = false
+    }
+
+    function createMailDocument(batch, orgId, orgName, type) {
+        const subject= "Novos Documentos Submetidos para Verificação"
+        const body = `
+                <p>Olá,</p>
+                <p>A empresa <strong>${orgName}</strong> enviou novos documentos para verificação.</p>
+                <p><strong>Tipo de Documentos:</strong> ${type}.</p>
+                <p>Para aceder e verificar os documentos submetidos, clique no link abaixo:</p>
+                <p><a href="http://backoffice.gotuk.pt/organizations/${orgId}" target="_blank">Verificar Documentos</a></p>
+            `
+
+        sendMail(batch, subject, body)
     }
 
     async function approve(documentType) {
