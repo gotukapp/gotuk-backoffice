@@ -84,10 +84,14 @@ export function sortWithHighlightNews(objectList) {
     ];
 }
 
-export function sendMail(batch, subject, body) {
+export function sendTicket(batch, subject, body) {
+    sendEmail(batch, "support@gotuk.freshdesk.com", subject, body)
+}
+
+export function sendEmail(batch, email, subject, body) {
     const mailRef = doc(collection(db, "mail"));
     batch.set(mailRef, {
-        to: ["support@gotuk.freshdesk.com"],
+        to: [email],
         message: {
             subject: subject,
             html: body

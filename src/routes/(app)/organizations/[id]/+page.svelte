@@ -29,7 +29,7 @@
     import { page } from "$app/stores";
     import { writable } from "svelte/store";
     import { authUser } from '$lib/stores/authUser.js'
-    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages, sendMail} from "$lib/utils.js";
+    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages, sendTicket, sendEmail} from "$lib/utils.js";
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
@@ -283,7 +283,7 @@
                 <p><a href="http://backoffice.gotuk.pt/organizations/${orgId}" target="_blank">Verificar Documentos</a></p>
             `
 
-        sendMail(batch, subject, body)
+        sendTicket(batch, subject, body)
     }
 
     async function approve(documentType) {
@@ -308,16 +308,49 @@
     }
 
     async function changeAccountStatus(currentState) {
+        const batch = writeBatch(db);
         const documentRef = doc(db, "organizations", $page.params.id)
-        await updateDoc(documentRef,
+        const orgCode = document.orgCode ? document.orgCode : generateRandomCode();
+        batch.update(documentRef,
             { "isValid": !currentState,
-             "orgCode": currentState ? "" : generateRandomCode()  }
+             "orgCode": orgCode }
         )
         alertMessage = currentState ?  "Account successfully blocked" : "Account successfully validated";
+        if (!currentState) {
+            createApprovedMailDocument(batch, orgCode)
+        }
+        await batch.commit();
         showAlert = true
         setTimeout(() => {
             showAlert = false;
         }, 2000);
+    }
+
+    function createApprovedMailDocument(batch, orgCode) {
+        const subject= "Conta ativada com sucesso – já podes começar a operar!"
+        const body = `<p>Olá ${document.name},</p>
+<p>Os teus documentos obrigatórios foram validados com sucesso e a tua conta <strong>GoTuk</strong> já
+se encontra ativa.<br>
+A partir de agora, já podes consultar o <strong>código da tua empresa</strong>, disponível na tua área
+de utilizador. Este código deve ser partilhado com os teus guides para que se
+associem corretamente à tua conta, depois só tens de os aceitar.</p>
+<p><strong>Código da Empresa: ${orgCode}</strong><br>
+<strong>Partilha este código com os teus guides</strong></p>
+<p>Caso necessites de apoio no envio dos documentos ou tenhas alguma dúvida,
+estamos inteiramente disponíveis para ajudar.</p>
+
+<p>Com os melhores cumprimentos,</p>
+<p><strong>Customer Care</strong><br>
+<img width="50" height="50" src="https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/images%2Fapplogo.png?alt=media&token=882b99c8-8caa-42d4-a580-18f47671f677" />
+<br>
+<span style="font-size: 10px">WhatsApp: +351917773031<br>
+Email: suporte@gotuk.pt<br>
+</span></p>
+<span style="font-size: 8px; line-height:1.0">Este e-mail, assim como os ficheiros eventualmente anexos, é reservado aos seus destinatários, e pode conter informação confidencial
+ou estar sujeito a restrições legais. Se não é o seu destinatário ou se recebeu esta mensagem por motivo de erro, solicitamos que não
+faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação permanente desta mensagem e respetivos anexos.</span>`
+
+        sendEmail(batch, document.email, subject, body)
     }
 
     function editContacts() {

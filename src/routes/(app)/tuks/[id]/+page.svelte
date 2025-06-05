@@ -15,7 +15,7 @@
     import {ArrowLeftOutline, CheckCircleSolid, FilePdfSolid} from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
     import {db} from '$lib'
-    import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages, sendMail} from '$lib/utils.js'
+    import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages, sendTicket} from '$lib/utils.js'
     import {
         collection,
         doc,
@@ -197,7 +197,7 @@
                 <p><a href="http://backoffice.gotuk.pt/tuks/${$page.params.id}" target="_blank">Verificar Documentos</a></p>
             `
 
-        sendMail(batch, subject, body)
+        sendTicket(batch, subject, body)
     }
 
     function removeImage(index) {
