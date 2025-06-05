@@ -25,6 +25,7 @@
                 email: email,
                 name: name,
                 isAdmin: false,
+                backoffice: true
             });
             await login(auth.currentUser);
             message = "Account created successfully!";
