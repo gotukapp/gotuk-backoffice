@@ -340,15 +340,17 @@ associem corretamente à tua conta, depois só tens de os aceitar.</p>
 estamos inteiramente disponíveis para ajudar.</p>
 
 <p>Com os melhores cumprimentos,</p>
-<p><strong>Customer Care</strong><br>
-<img width="50" height="50" src="https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/images%2Fapplogo.png?alt=media&token=882b99c8-8caa-42d4-a580-18f47671f677" />
+<p><img width="50" height="50" src="https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/images%2Fapplogo.png?alt=media&token=882b99c8-8caa-42d4-a580-18f47671f677" />
 <br>
+<strong>Customer Care</strong><br>
 <span style="font-size: 10px">WhatsApp: +351917773031<br>
 Email: suporte@gotuk.pt<br>
 </span></p>
-<span style="font-size: 8px; line-height:1.0">Este e-mail, assim como os ficheiros eventualmente anexos, é reservado aos seus destinatários, e pode conter informação confidencial
+<p><span style="font-size: 10px">Este é um email automático. Por favor, não respondas a esta mensagem.</span></p>
+<p><span style="font-size: 8px; display: block; line-height:1.0">Este e-mail, assim como os ficheiros eventualmente anexos, é reservado aos seus destinatários, e pode conter informação confidencial
 ou estar sujeito a restrições legais. Se não é o seu destinatário ou se recebeu esta mensagem por motivo de erro, solicitamos que não
-faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação permanente desta mensagem e respetivos anexos.</span>`
+faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação permanente desta mensagem e respetivos anexos.</span></p>
+`
 
         sendEmail(batch, document.email, subject, body)
     }
