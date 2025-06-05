@@ -24,7 +24,7 @@
     import {get, writable} from "svelte/store";
     import {authUser} from '$lib/stores/authUser.js'
     import {SearchSolid, TrashBinSolid, CirclePlusSolid} from "flowbite-svelte-icons";
-    import {getOrgName} from "$lib/stores/organizations.js";
+    import {getOrg} from "$lib/stores/organizations.js";
 
     let tuks = writable([]);
     let createForm = false;
@@ -90,7 +90,7 @@
 
         const promises = currentTuks.map(async (tuk) => {
             try {
-                tuk.orgName = await getOrgName(tuk.organizationRef)
+                tuk.orgName = (await getOrg(tuk.organizationRef)).name
             } catch (e) {
                 console.error('Error loading organization:', tuk.organizationRef.id, e);
                 tuk.orgName = "Error loading " + tuk.organizationRef.id;

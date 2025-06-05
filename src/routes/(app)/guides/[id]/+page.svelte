@@ -22,7 +22,7 @@
     import {formatDate, getAllFilesFromFolder} from "$lib/utils.js";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
-    import { getOrgName } from '$lib/stores/organizations';
+    import { getOrg } from '$lib/stores/organizations';
 
     let showAlert = $state(false);
     let alertMessage = $state('');
@@ -101,7 +101,7 @@
             if (guideSnap.exists()) {
                 guide = guideSnap.data();
                 if (guide.organizationRef) {
-                    guide.orgName = await getOrgName(guide.organizationRef);
+                    guide.orgName = (await getOrg(guide.organizationRef)).name;
                 }
 
                 const queryPersonalData = query(collection(doc(db, "users", id), "personalData"), orderBy("submitDate", "desc"), limit(1));

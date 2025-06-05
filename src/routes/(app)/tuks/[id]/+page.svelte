@@ -15,7 +15,15 @@
     import {ArrowLeftOutline, CheckCircleSolid, FilePdfSolid} from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
     import {db} from '$lib'
-    import {getAllFilesFromFolder, getStatusColor, formatDate, openFilePicker, uploadImages, sendTicket} from '$lib/utils.js'
+    import {
+        getAllFilesFromFolder,
+        getStatusColor,
+        formatDate,
+        openFilePicker,
+        uploadImages,
+        sendTicket,
+        sendEmail
+    } from '$lib/utils.js'
     import {
         collection,
         doc,
@@ -32,7 +40,7 @@
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
-    import { getOrgName } from '$lib/stores/organizations';
+    import { getOrg } from '$lib/stores/organizations';
 
     let validateAccountConfirmation = $state(false);
     let showAlert = $state(false);
@@ -82,7 +90,7 @@
                 if (docSnap.exists()) {
                     tuktukDoc = docSnap.data();
                     if (tuktukDoc.organizationRef) {
-                        tuktukDoc.orgName = await getOrgName(tuktukDoc.organizationRef);
+                        tuktukDoc.orgName = (await getOrg(tuktukDoc.organizationRef)).name;
                     }
 
                     const vehicleInsuranceDocRef = collection(doc(db, "tuktuks", id), "vehicleInsurance");
@@ -200,6 +208,29 @@
         sendTicket(batch, subject, body)
     }
 
+    function createApprovedMailDocument(batch, org) {
+        const subject= "O teu tuk tuk já foi validado!"
+        const body = `<p>Olá ${org.name},</p>
+<p>O tuk tuk com a matrícula <strong>${$page.params.id}</strong> foi validado com sucesso.<br>
+Já tens tudo pronto para aceitar reservas na plataforma!</p>
+<p>Caso necessites de apoio ou tenhas alguma dúvida, estamos inteiramente disponíveis
+para ajudar.</p>
+<p>Com os melhores cumprimentos,</p>
+<p><img width="50" height="50" src="https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/images%2Fapplogo.png?alt=media&token=882b99c8-8caa-42d4-a580-18f47671f677" />
+<br>
+<strong>Customer Care</strong><br>
+<span style="font-size: 10px">WhatsApp: +351917773031<br>
+Email: suporte@gotuk.pt<br>
+</span></p>
+<p><span style="font-size: 10px">Este é um email automático. Por favor, não respondas a esta mensagem.</span></p>
+<p><span style="font-size: 8px; display: block; line-height:1.0">Este e-mail, assim como os ficheiros eventualmente anexos, é reservado aos seus destinatários, e pode conter informação confidencial
+ou estar sujeito a restrições legais. Se não é o seu destinatário ou se recebeu esta mensagem por motivo de erro, solicitamos que não
+faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação permanente desta mensagem e respetivos anexos.</span></p>
+`
+
+        sendEmail(batch, org.email, subject, body)
+    }
+
     function removeImage(index) {
         selectedFiles.splice(index, 1)
         localPreviews.splice(index, 1)
@@ -245,9 +276,15 @@
     }
 
     async function changeStatus(currentState) {
+        const batch = writeBatch(db);
         const documentRef = doc(db, "tuktuks", $page.params.id)
-        await updateDoc(documentRef, { "isValid": !currentState })
+        batch.update(documentRef, { "isValid": !currentState })
         alertMessage = document.isValid ?  "Tuktuk successfully validated" : "Tuktuk successfully blocked"
+        if (!currentState) {
+            const org = await getOrg(tuktukDoc.organizationRef)
+            createApprovedMailDocument(batch, org)
+        }
+        await batch.commit();
         showAlert = true
         setTimeout(() => {
             showAlert = false;

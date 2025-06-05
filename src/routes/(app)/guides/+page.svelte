@@ -6,7 +6,7 @@
     import {authUser} from '$lib/stores/authUser.js'
     import {SearchSolid, TrashBinSolid, CloseCircleSolid} from "flowbite-svelte-icons";
     import {get, writable} from "svelte/store";
-    import {getOrgName} from "$lib/stores/organizations.js";
+    import {getOrg} from "$lib/stores/organizations.js";
     import {sortWithHighlightNews} from "$lib/utils.js";
 
     export const orgNames = writable(new Map());
@@ -46,7 +46,7 @@
 
         const promises = updatedUsers.map(async (user) => {
             try {
-                user.orgName = await getOrgName(user.organizationRef)
+                user.orgName = (await getOrg(user.organizationRef)).name
             } catch (e) {
                 console.error('Error loading organization:', user.organizationRef.id, e);
                 user.orgName = "Error loading " + user.organizationRef.id;

@@ -7,7 +7,7 @@ const orgMap = writable(new Map());
  * Returns org name from cache or loads it if missing.
  * @param {DocumentReference} orgRef - Firestore organization reference
  */
-export async function getOrgName(orgRef) {
+export async function getOrg(orgRef) {
     if (!orgRef?.id) return 'Unknown';
 
     const current = new Map(get(orgMap));
@@ -20,10 +20,10 @@ export async function getOrgName(orgRef) {
 
     try {
         const snap = await getDoc(orgRef);
-        const name = snap.exists() ? snap.data().name : 'Unknown Org';
-        current.set(orgRef.id, name);
+        const org = snap.exists() ? snap.data() : 'Unknown Org';
+        current.set(orgRef.id, org);
         orgMap.set(current); // 🔁 Trigger reactivity
-        return name;
+        return org;
     } catch (e) {
         console.error('Error loading org:', e);
         current.set(orgRef.id, 'Error');
