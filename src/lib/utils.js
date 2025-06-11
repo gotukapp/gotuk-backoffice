@@ -1,6 +1,6 @@
 import {getDownloadURL, listAll, ref, uploadBytes, getMetadata} from "firebase/storage";
 import {db, storage} from "./index.js";
-import {collection, doc} from "firebase/firestore";
+import {collection, doc, setDoc} from "firebase/firestore";
 
 export async function getAllFilesFromFolder(folderPath) {
     const folderRef = ref(storage, folderPath)
@@ -97,4 +97,17 @@ export function sendEmail(batch, email, subject, body) {
             html: body
         }
     });
+}
+
+export async function addDocumentationDate(docId, docRef) {
+    const entityRef = doc(db, "organizations", docId);
+    const newDoc = doc(collection(db, "documentation"));
+    const data = docRef.data();
+    await setDoc(newDoc,
+        {
+            entity: entityRef,
+            documentRef: docRef,
+            expirationDate: data.expirationDate
+        }
+    );
 }

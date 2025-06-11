@@ -29,7 +29,7 @@
     import { page } from "$app/stores";
     import { writable } from "svelte/store";
     import { authUser } from '$lib/stores/authUser.js'
-    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages, sendTicket, sendEmail} from "$lib/utils.js";
+    import {getAllFilesFromFolder, formatDate, openFilePicker, uploadImages, sendTicket, sendEmail, addDocumentationDate} from "$lib/utils.js";
     import {slide} from "svelte/transition";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
@@ -294,6 +294,11 @@
         if (!querySnapshot.empty) {
             const docRef = querySnapshot.docs[0].ref;
             await updateDoc(docRef, { status: "approved" });
+
+            if (documentType === "civilLiabilityInsurance"
+                || documentType === "workAccidentInsurance") {
+                await addDocumentationDate($page.params.id, docRef);
+            }
         } else {
             console.log("No documents found to approve.");
         }

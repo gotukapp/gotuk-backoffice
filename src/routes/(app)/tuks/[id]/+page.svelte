@@ -22,7 +22,7 @@
         openFilePicker,
         uploadImages,
         sendTicket,
-        sendEmail
+        sendEmail, addDocumentationDate
     } from '$lib/utils.js'
     import {
         collection,
@@ -261,15 +261,20 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
         localPersonalInsurancePreviews = selectedPersonalInsuranceFiles.map(file => URL.createObjectURL(file))
     }
 
-    async function approve(fieldName) {
-        const documentsRef = collection(doc(db, "tuktuks", $page.params.id), fieldName);
+    async function approve(documentType) {
+        const documentsRef = collection(doc(db, "tuktuks", $page.params.id), documentType);
         const q = query(documentsRef, orderBy("submitDate", "desc"), limit(1));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
             const docRef = querySnapshot.docs[0].ref;
             await updateDoc(docRef, { status: "approved" });
-            console.log(`Field "${fieldName}" updated to "approved".`);
+
+            if (documentType === "vehicleInsurance"
+                || documentType === "personalAccidentInsurance") {
+                await addDocumentationDate($page.params.id, docRef);
+            }
+            console.log(`Field "${documentType}" updated to "approved".`);
         } else {
             console.log("No documents found to approve.");
         }
