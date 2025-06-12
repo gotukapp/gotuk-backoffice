@@ -57,12 +57,12 @@
 
             if (documentType === "workAccidentInsurance" &&
                 !workAccidentInsuranceData?.useOrganizationInsurance) {
-                await addDocumentationDate("users", $page.params.id, docRef, data.expirationDate);
+                await addDocumentationDate("users", $page.params.id, docRef, data.expirationDate, documentType);
             }
 
             if (documentType === "personalData") {
-                await addDocumentationDate("users", $page.params.id, docRef, data.identificationNumberExpirationDate);
-                await addDocumentationDate("users", $page.params.id, docRef, data.drivingLicenseExpirationDate);
+                await addDocumentationDate("users", $page.params.id, docRef, data.identificationNumberExpirationDate, "identificationNumber");
+                await addDocumentationDate("users", $page.params.id, docRef, data.drivingLicenseExpirationDate, "drivingLicense");
             }
 
             console.log(`Documents "${documentType}" updated to "approved".`);

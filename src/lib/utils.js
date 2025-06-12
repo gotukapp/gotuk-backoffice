@@ -1,6 +1,6 @@
 import {getDownloadURL, listAll, ref, uploadBytes, getMetadata} from "firebase/storage";
 import {db, storage} from "./index.js";
-import {collection, doc, setDoc} from "firebase/firestore";
+import {collection, doc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
 
 export async function getAllFilesFromFolder(folderPath) {
     const folderRef = ref(storage, folderPath)
@@ -99,14 +99,31 @@ export function sendEmail(batch, email, subject, body) {
     });
 }
 
-export async function addDocumentationDate(entityName, docId, docRef, expirationDate) {
+export async function addDocumentationDate(entityName, docId, docRef, expirationDate, documentType) {
     const entityRef = doc(db, entityName, docId);
-    const newDoc = doc(collection(db, "documentation"));
-    await setDoc(newDoc,
-        {
-            entity: entityRef,
-            documentRef: docRef,
-            expirationDate: expirationDate
-        }
+    const documentationRef = collection(db, "documentation");
+    const q = query(
+        documentationRef,
+        where("entity", "==", entityRef),
+        where("documentType", "==", documentType)
     );
+
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+        const existingDocRef = snapshot.docs[0].ref;
+        await updateDoc(existingDocRef, {
+            documentRef: docRef,
+            expirationDate: expirationDate,
+            emailWarning: "Not Sent"
+        });
+    } else {
+        const newDocRef = doc(documentationRef); // Auto-generated ID
+        await setDoc(newDocRef, {
+            entity: entityRef,
+            documentType: documentType,
+            documentRef: docRef,
+            expirationDate: expirationDate,
+            emailWarning: "Not Sent"
+        });
+    }
 }

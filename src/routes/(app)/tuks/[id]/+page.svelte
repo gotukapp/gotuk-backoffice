@@ -273,7 +273,7 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
 
             if (documentType === "vehicleInsurance"
                 || documentType === "personalAccidentInsurance") {
-                await addDocumentationDate("tuktuks", $page.params.id, docRef, data.expirationDate);
+                await addDocumentationDate("tuktuks", $page.params.id, docRef, data.expirationDate, documentType);
             }
             console.log(`Field "${documentType}" updated to "approved".`);
         } else {

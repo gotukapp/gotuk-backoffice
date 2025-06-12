@@ -298,7 +298,7 @@
 
             if (documentType === "civilLiabilityInsurance"
                 || documentType === "workAccidentInsurance") {
-                await addDocumentationDate("organizations", $page.params.id, docRef, data.expirationDate);
+                await addDocumentationDate("organizations", $page.params.id, docRef, data.expirationDate, documentType);
             }
         } else {
             console.log("No documents found to approve.");
