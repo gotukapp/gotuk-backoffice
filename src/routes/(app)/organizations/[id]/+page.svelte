@@ -294,10 +294,11 @@
         if (!querySnapshot.empty) {
             const docRef = querySnapshot.docs[0].ref;
             await updateDoc(docRef, { status: "approved" });
+            const data = querySnapshot.docs[0].data();
 
             if (documentType === "civilLiabilityInsurance"
                 || documentType === "workAccidentInsurance") {
-                await addDocumentationDate($page.params.id, docRef);
+                await addDocumentationDate("organizations", $page.params.id, docRef, data.expirationDate);
             }
         } else {
             console.log("No documents found to approve.");

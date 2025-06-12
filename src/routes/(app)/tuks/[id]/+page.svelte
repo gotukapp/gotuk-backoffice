@@ -269,10 +269,11 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
         if (!querySnapshot.empty) {
             const docRef = querySnapshot.docs[0].ref;
             await updateDoc(docRef, { status: "approved" });
+            const data = querySnapshot.docs[0].data();
 
             if (documentType === "vehicleInsurance"
                 || documentType === "personalAccidentInsurance") {
-                await addDocumentationDate($page.params.id, docRef);
+                await addDocumentationDate("tuktuks", $page.params.id, docRef, data.expirationDate);
             }
             console.log(`Field "${documentType}" updated to "approved".`);
         } else {

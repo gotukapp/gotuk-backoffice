@@ -19,7 +19,7 @@
     import { page } from "$app/stores";
     import { slide } from "svelte/transition";
     import { authUser } from '$lib/stores/authUser.js'
-    import {formatDate, getAllFilesFromFolder} from "$lib/utils.js";
+    import {addDocumentationDate, formatDate, getAllFilesFromFolder} from "$lib/utils.js";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import { getOrg } from '$lib/stores/organizations';
@@ -45,17 +45,27 @@
     let criminalRecordData = $state(null);
     let criminalRecordFiles = $state([]);
 
-    async function approve(fieldName) {
-        const documentsRef = collection(doc(db, "users", $page.params.id), fieldName);
+    async function approve(documentType) {
+        const documentsRef = collection(doc(db, "users", $page.params.id), documentType);
         const q = query(documentsRef, orderBy("submitDate", "desc"), limit(1));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-            const docRef = querySnapshot.docs[0].ref; // Use .ref to get the reference of the document
-
-            // Update the specified field
+            const docRef = querySnapshot.docs[0].ref;
             await updateDoc(docRef, { status: "approved" });
-            console.log(`Documents "${fieldName}" updated to "approved".`);
+            const data = querySnapshot.docs[0].data();
+
+            if (documentType === "workAccidentInsurance" &&
+                !workAccidentInsuranceData?.useOrganizationInsurance) {
+                await addDocumentationDate("users", $page.params.id, docRef, data.expirationDate);
+            }
+
+            if (documentType === "personalData") {
+                await addDocumentationDate("users", $page.params.id, docRef, data.identificationNumberExpirationDate);
+                await addDocumentationDate("users", $page.params.id, docRef, data.drivingLicenseExpirationDate);
+            }
+
+            console.log(`Documents "${documentType}" updated to "approved".`);
         } else {
             console.log("No documents found to approve.");
         }

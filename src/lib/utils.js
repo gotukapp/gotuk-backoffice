@@ -99,15 +99,14 @@ export function sendEmail(batch, email, subject, body) {
     });
 }
 
-export async function addDocumentationDate(docId, docRef) {
-    const entityRef = doc(db, "organizations", docId);
+export async function addDocumentationDate(entityName, docId, docRef, expirationDate) {
+    const entityRef = doc(db, entityName, docId);
     const newDoc = doc(collection(db, "documentation"));
-    const data = docRef.data();
     await setDoc(newDoc,
         {
             entity: entityRef,
             documentRef: docRef,
-            expirationDate: data.expirationDate
+            expirationDate: expirationDate
         }
     );
 }
