@@ -4,7 +4,7 @@
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {authUser} from '$lib/stores/authUser.js'
-    import {SearchSolid, TrashBinSolid, CloseCircleSolid} from "flowbite-svelte-icons";
+    import {SearchSolid, TrashBinSolid, CloseCircleSolid, CalendarMonthSolid} from "flowbite-svelte-icons";
     import {get, writable} from "svelte/store";
     import {getOrg} from "$lib/stores/organizations.js";
     import {sortWithHighlightNews} from "$lib/utils.js";
@@ -124,6 +124,9 @@
                 <TableBodyCell>{user.accountValidated ? "Ok" : "Blocked"}</TableBodyCell>
                 <TableBodyCell>{user.rating}</TableBodyCell>
                 <TableBodyCell class="flex items-center space-x-4">
+                    {#if !$authUser.isAdmin}
+                        <a href="/guides/agenda?guideId={user.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><CalendarMonthSolid /></a>
+                    {/if}
                     <a href="/guides/{user.id}" class="font-medium text-stone-500 hover:underline dark:text-stone-500"><SearchSolid/></a>
                     {#if $authUser.isAdmin}
                         <button class="font-medium text-primary-600 hover:underline dark:text-primary-600"

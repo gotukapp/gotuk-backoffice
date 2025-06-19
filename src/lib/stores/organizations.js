@@ -22,7 +22,7 @@ export async function getOrg(orgRef) {
         const snap = await getDoc(orgRef);
         const org = snap.exists() ? snap.data() : 'Unknown Org';
         current.set(orgRef.id, org);
-        orgMap.set(current); // 🔁 Trigger reactivity
+        orgMap.set(current);
         return org;
     } catch (e) {
         console.error('Error loading org:', e);

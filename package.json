@@ -29,6 +29,13 @@
 		"axios": "^1.5.0",
 		"firebase": "^11.0.1",
 		"flowbite-svelte-blocks": "^1.1.4",
-		"svelte-i18n": "^4.0.1"
+		"svelte-i18n": "^4.0.1",
+		"@fullcalendar/core": "^6.1.17",
+		"@fullcalendar/daygrid": "^6.1.17",
+		"@fullcalendar/interaction": "^6.1.17",
+		"@fullcalendar/timegrid": "^6.1.17",
+		"@fullcalendar/common": "^5.11.5",
+		"svelte-fullcalendar": "^3.0.0",
+		"svelte-preprocess": "^6.0.3"
 	}
 }

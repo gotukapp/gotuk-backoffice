@@ -6,14 +6,14 @@
     import {
         ChartPieSolid,
         UserSolid,
-        ProfileCardSolid, TruckSolid, LandmarkSolid, StoreSolid, MapPinAltSolid
+        ProfileCardSolid, TruckSolid, LandmarkSolid, StoreSolid, MapPinAltSolid, CalendarMonthSolid
+
     } from 'flowbite-svelte-icons';
     import {goto} from "$app/navigation";
     import {onMount} from "svelte";
     import {logout, authUser} from '$lib/stores/authUser.js'
     import { _ } from 'svelte-i18n';
 
-    let spanClass = 'flex-1 ms-3 whitespace-nowrap';
     let {data, children} = $props()
     let activeUrl = $state('');
     let faqUrl = $state('');
@@ -123,6 +123,11 @@
                             <SidebarItem label="Empresa" href="/organizations/{$authUser.user?.organizationRef?.id}" on:click={() => activeUrl = '/organizations'} active={activeUrl.startsWith('/organizations')}>
                                 <svelte:fragment slot="icon">
                                     <StoreSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+                                </svelte:fragment>
+                            </SidebarItem>
+                            <SidebarItem label="Agenda" href="/guides/agenda?id={$authUser.user?.organizationRef?.id}" on:click={() => activeUrl = '/organizations'} active={activeUrl.startsWith('/organizations')}>
+                                <svelte:fragment slot="icon">
+                                    <CalendarMonthSolid class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
                                 </svelte:fragment>
                             </SidebarItem>
                             <SidebarItem label="Guias" href="/guides" on:click={() => activeUrl = '/guides'} active={activeUrl === '/guides'}>
