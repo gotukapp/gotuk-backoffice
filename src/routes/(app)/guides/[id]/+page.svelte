@@ -19,7 +19,7 @@
     import { page } from "$app/stores";
     import { slide } from "svelte/transition";
     import { authUser } from '$lib/stores/authUser.js'
-    import {addDocumentationDate, formatDate, getAllFilesFromFolder} from "$lib/utils.js";
+    import {addDocumentationDate, formatDate, getAllFilesFromFolder, addRankingBonus} from "$lib/utils.js";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import { getOrg } from '$lib/stores/organizations';
@@ -63,6 +63,10 @@
             if (documentType === "personalData") {
                 await addDocumentationDate("users", $page.params.id, docRef, data.identificationNumberExpirationDate, "identificationNumber");
                 await addDocumentationDate("users", $page.params.id, docRef, data.drivingLicenseExpirationDate, "drivingLicense");
+            }
+
+            if (documentType === "criminalRecord" || documentType === "workAccidentInsurance") {
+                await addRankingBonus(doc(db, "users", $page.params.id), 0.2)
             }
 
             console.log(`Documents "${documentType}" updated to "approved".`);

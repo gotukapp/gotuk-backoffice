@@ -1,6 +1,7 @@
 import {getDownloadURL, listAll, ref, uploadBytes, getMetadata} from "firebase/storage";
 import {db, storage} from "./index.js";
 import {collection, doc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
+import {getGuide} from "$lib/stores/guides.js";
 
 export async function getAllFilesFromFolder(folderPath) {
     const folderRef = ref(storage, folderPath)
@@ -126,4 +127,13 @@ export async function addDocumentationDate(entityName, docId, docRef, expiration
             emailWarning: "Not Sent"
         });
     }
+}
+
+export async function addRankingBonus(guideRef, value) {
+    const guide = await getGuide(guideRef)
+    const newValue = guide.rating + value;
+    console.log(newValue)
+    await updateDoc(guideRef, {
+        rating: newValue > 5 ? 5 : newValue
+    });
 }
