@@ -11,6 +11,8 @@
 
     export const orgNames = writable(new Map());
     let users = writable([]);
+    let total = $state(0);
+    let totalOk = $state(0);
 
     onMount(async () => {
         const firebaseUser = $authUser.user
@@ -25,6 +27,9 @@
             }));
 
             const sortedUsers = sortWithHighlightNews(fetchedUsers);
+
+            total = sortedUsers.length
+            totalOk = sortedUsers.filter(t => t.accountValidated).length
 
             users.set(sortedUsers);
 
@@ -91,7 +96,7 @@
 <div class="w-full">
 <Table >
     <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-        Guias
+        Guias <span class="text-sm text-gray-700 spa">(Registados: {total}</span><span class="text-sm text-gray-700 ml-4">Aprovados: {totalOk})</span>
     </caption>
     <TableHead>
         <TableHeadCell>Nome</TableHeadCell>

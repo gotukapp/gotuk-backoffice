@@ -33,6 +33,10 @@
     let seats = "4";
     let isElectric = true;
     let licensePlateError = false;
+
+    let total = writable(0);
+    let totalOk = writable(0);
+
     export const orgNames = writable(new Map());
 
     onMount(() => {
@@ -74,6 +78,9 @@
                 ...recentTuks.sort(sortByName),
                 ...olderTuks.sort(sortByName)
             ];
+
+            total = sortedTuks.length
+            totalOk = sortedTuks.filter(t => t.isValid).length
 
             tuks.set(sortedTuks);
 
@@ -156,7 +163,7 @@
 <Table >
     <caption class="p-5 text-lg font-semibold w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
         <div class="flex justify-between items-center w-full">
-            <span>Tuks</span>
+            <span>Tuks <span class="text-sm text-gray-700 spa">(Registados: {total}</span><span class="text-sm text-gray-700 ml-4">Aprovados: {totalOk})</span></span>
             {#if !$authUser.isAdmin }
                 <Button pill color="light" on:click={() => createForm = true}><CirclePlusSolid class="mr-2" />Adicionar</Button>
             {/if}

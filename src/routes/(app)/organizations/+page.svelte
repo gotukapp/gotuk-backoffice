@@ -12,6 +12,9 @@
     let orgs = writable([]);
     let unsubscribe;
 
+    let total = 0;
+    let totalOk = 0;
+
     onMount(async () => {
         if ($authUser.isAdmin) {
             unsubscribe = onSnapshot(collection(db, "organizations"), async (snapshot) => {
@@ -31,8 +34,12 @@
                         , where("guideMode", "==", true));
                     const guidesCount = (await getCountFromServer(guidesQuery)).data().count;
 
+
                     return {...orgData, tuksCount, guidesCount};
                 }));
+
+                total = organizations.length
+                totalOk = organizations.filter(org => org.isValid).length
 
                 const sortedOrgs = sortWithHighlightNews(organizations);
 
@@ -52,7 +59,7 @@
 <div class="w-full">
 <Table >
     <caption class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
-        Organizations
+        Organizations <span class="text-sm text-gray-700 spa">(Registadas: {total}</span><span class="text-sm text-gray-700 ml-4">Aprovadas: {totalOk})</span>
     </caption>
     <TableHead>
         <TableHeadCell>Name</TableHeadCell>
