@@ -131,7 +131,7 @@ export async function addDocumentationDate(entityName, docId, docRef, expiration
 
 export async function addRankingBonus(guideRef, value) {
     const guide = await getGuide(guideRef)
-    const newValue = guide.rating + value;
+    const newValue = parseFloat((guide.rating + value).toFixed(2));
     console.log(newValue)
     await updateDoc(guideRef, {
         rating: newValue > 5 ? 5 : newValue

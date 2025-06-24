@@ -22,7 +22,7 @@
         onSnapshot,
         addDoc,
         updateDoc,
-        query, orderBy
+        query, orderBy, setDoc
     } from "firebase/firestore";
     import { page } from "$app/stores";
     import { CalendarWeekSolid, PlaySolid, CheckCircleSolid, FlagSolid, CloseCircleSolid } from 'flowbite-svelte-icons';
@@ -168,7 +168,66 @@
         return reason
     }
 
-    const cancelTrip = async (date, reason, notes) => {
+    async function updateUserCollection(date, hour) {
+        const userUnavailabilityRef = collection(db, "users", guideId, "unavailability");
+        const dayDocRef = doc(userUnavailabilityRef, date);
+        const daySnapshot = await getDoc(dayDocRef);
+        let slots = [];
+
+        if (daySnapshot.exists()) {
+            const data = daySnapshot.data();
+            slots = data.slots || [];
+        }
+
+        slots = slots.filter(slot => slot !== hour);
+
+        await setDoc(dayDocRef, {
+            date: new Date(date),
+            slots
+        });
+    }
+
+    export async function updateUnavailabilityCollection(guideId, day, hour) {
+        const unavailabilityRef = doc(db, "unavailability", day);
+        const daySnapshot = await getDoc(unavailabilityRef);
+
+        let guides = [];
+        if (daySnapshot.exists()) {
+            const data = daySnapshot.data();
+            if (data && data[hour]) {
+                guides = data[hour];
+            }
+        }
+
+        guides = guides.filter(id => id !== guideId);
+
+        await setDoc(unavailabilityRef, {
+            [hour]: guides
+        });
+
+    }
+
+    async function updateUserUnavailability() {
+        const tripDate = tripDoc.date.toDate()
+        const hours = tripDate.getHours()
+        const minutes = tripDate.getMinutes()
+        for (let i = 0; i < tour.durationSlots; i++) {
+            // Calculate total minutes from the starting point
+            const totalMinutes = (hours * 60) + minutes + (i * 30)
+            const newHour = Math.floor(totalMinutes / 60)
+            const newMinutes = totalMinutes % 60
+            const hourString = `${newHour.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`
+            const year = tripDate.getFullYear()
+            const month = String(tripDate.getMonth() + 1).padStart(2, '0')
+            const day = String(tripDate.getDate()).padStart(2, '0')
+            const dateString = `${year}-${month}-${day}`
+
+            await updateUserCollection(dateString, hourString)
+            await updateUnavailabilityCollection(guideId, dateString, hourString)
+        }
+    }
+
+    const cancelTrip = async (reason, notes) => {
         const docRef = doc(db, "trips", tripId);
         const actionsCollection = collection(docRef, "events");
         await addDoc(actionsCollection, {
@@ -178,9 +237,16 @@
             "notes": notes,
             "createdBy": auth.currentUser.uid
         })
+
+        if (tripDoc.status === 'booked') {
+            await updateUserUnavailability();
+        }
+
         await updateDoc(docRef, "canceledDate", serverTimestamp(), "status", "canceled")
         cancelConfirmation = false;
     };
+
+    $: isFormValid = selectedCancelReason && notes.trim().length > 0;
 </script>
 <div class="w-full" style="margin: 20px">
     <div class="flex items-center space-x-2">
@@ -274,7 +340,7 @@
                                 {#each $tripEvents as event}
                                     <TimelineItem
                                             title={event.action.charAt(0).toUpperCase() + event.action.slice(1)}
-                                            date={event.creationDate.toDate().toLocaleString()}>
+                                            date={event.creationDate?.toDate().toLocaleString()}>
                                         <svelte:fragment slot="icon">
                                               <span class="flex absolute -start-3 justify-center items-center w-6 h-6 bg-primary-200 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-primary-900">
                                                 {#if event.action === "created"}
@@ -308,11 +374,16 @@
                                 <Label class="space-y-2">
                                     <span>Notes</span>
                                     <Textarea id="textarea-id" placeholder="" rows="4" name="message" bind:value={notes}/>
+                                    {#if !notes.trim()}
+                                        <p class="text-red-500 text-sm mt-1">Notes are required.</p>
+                                    {/if}
                                 </Label>
                                 <svelte:fragment slot="footer">
                                     <Button type="submit"
-                                            on:click={() => cancelTrip(tripDoc.date, selectedCancelReason, notes)}
-                                            disabled={!selectedCancelReason}>Yes</Button>
+                                            on:click={() => cancelTrip(selectedCancelReason, notes)}
+                                            disabled={!isFormValid}>
+                                        Yes
+                                    </Button>
                                     <Button on:click={() => { cancelConfirmation = false }} color="alternative">No</Button>
                                 </svelte:fragment>
                             </Modal>
