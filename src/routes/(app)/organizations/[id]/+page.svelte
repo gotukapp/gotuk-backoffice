@@ -182,23 +182,39 @@
     }
 
     function selectFiles(event) {
-        selectedFiles.push(...Array.from(event.target.files))
-        localPreviews = selectedFiles.map(file => URL.createObjectURL(file))
+        const files = Array.from(event.target.files);
+        selectedFiles.push(...files);
+        localPreviews = selectedFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
     }
 
     function selectCivilLiabilityInsuranceFiles(event) {
-        selectedCivilLiabilityInsuranceFiles.push(...Array.from(event.target.files))
-        localCivilLiabilityInsurancePreviews = selectedCivilLiabilityInsuranceFiles.map(file => URL.createObjectURL(file))
+        const files = Array.from(event.target.files);
+        selectedCivilLiabilityInsuranceFiles.push(...files);
+        localCivilLiabilityInsurancePreviews = selectedCivilLiabilityInsuranceFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
     }
 
     function selectActivityCertificateFiles(event) {
-        selectedActivityCertificateFiles.push(...Array.from(event.target.files))
-        localActivityCertificatePreviews = selectedActivityCertificateFiles.map(file => URL.createObjectURL(file))
+        const files = Array.from(event.target.files);
+        selectedActivityCertificateFiles.push(...files);
+        localActivityCertificatePreviews = selectedActivityCertificateFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
     }
 
     function selectLicenseRNAATFiles(event) {
-        selectedLicenseRNAATFiles.push(...Array.from(event.target.files))
-        localLicenseRNAATPreviews = selectedLicenseRNAATFiles.map(file => URL.createObjectURL(file))
+        const files = Array.from(event.target.files);
+        selectedLicenseRNAATFiles.push(...files);
+        localLicenseRNAATPreviews = selectedLicenseRNAATFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
     }
 
     async function submitContacts() {
@@ -532,8 +548,15 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                         <div class="flex gap-2 mt-2">
                                             {#each localActivityCertificatePreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
-                                                    <!-- Image Preview -->
-                                                    <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                                    {#if preview.type.startsWith('image/')}
+                                                        <img src={preview.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                                    {:else if preview.type === 'application/pdf'}
+                                                        <FilePdfSolid class="w-10 h-10"/>
+                                                    {:else if preview.type.includes('word')}
+                                                        <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                                    {:else}
+                                                        <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                                    {/if}
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedActivityCertificateFiles, localActivityCertificatePreviews, index)}} >
                                                         ✕
                                                     </button>
@@ -607,8 +630,15 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                         <div class="flex gap-2 mt-2">
                                             {#each localLicenseRNAATPreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
-                                                    <!-- Image Preview -->
-                                                    <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                                    {#if preview.type.startsWith('image/')}
+                                                        <img src={preview.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                                    {:else if preview.type === 'application/pdf'}
+                                                        <FilePdfSolid class="w-10 h-10"/>
+                                                    {:else if preview.type.includes('word')}
+                                                        <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                                    {:else}
+                                                        <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                                    {/if}
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedLicenseRNAATFiles, localLicenseRNAATPreviews, index)}} >
                                                         ✕
                                                     </button>
@@ -700,8 +730,15 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                         <div class="flex gap-2 mt-2">
                                             {#each localCivilLiabilityInsurancePreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
-                                                    <!-- Image Preview -->
-                                                    <img src={preview} alt="Document" class="w-full h-full object-cover rounded-md" />
+                                                    {#if preview.type.startsWith('image/')}
+                                                        <img src={preview.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                                    {:else if preview.type === 'application/pdf'}
+                                                        <FilePdfSolid class="w-10 h-10"/>
+                                                    {:else if preview.type.includes('word')}
+                                                        <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                                    {:else}
+                                                        <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                                    {/if}
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedCivilLiabilityInsuranceFiles, localCivilLiabilityInsurancePreviews, index)}} >
                                                         ✕
                                                     </button>
@@ -794,7 +831,15 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                             {#each localPreviews as preview, index}
                                                 <div class="relative w-20 h-20 previewImage">
                                                     <!-- Image Preview -->
-                                                    <img alt="Document" class="w-full h-full object-cover rounded-md" src={preview} />
+                                                    {#if preview.type.startsWith('image/')}
+                                                        <img src={preview.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
+                                                    {:else if preview.type === 'application/pdf'}
+                                                        <FilePdfSolid class="w-10 h-10"/>
+                                                    {:else if preview.type.includes('word')}
+                                                        <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
+                                                    {:else}
+                                                        <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
+                                                    {/if}
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(selectedFiles, localPreviews, index)}} >
                                                         ✕
                                                     </button>
