@@ -12,7 +12,7 @@
         Accordion,
         Alert
     } from 'flowbite-svelte';
-    import {ArrowLeftOutline, CheckCircleSolid, FilePdfSolid} from 'flowbite-svelte-icons';
+    import {ArrowLeftOutline, CheckCircleSolid} from 'flowbite-svelte-icons';
     import {onMount} from "svelte";
     import {db} from '$lib'
     import {
@@ -41,6 +41,7 @@
     import DocumentStatusIcons from "$lib/components/DocumentStatusIcons.svelte";
     import DocumentStatusBadge from "$lib/components/DocumentStatusBadge.svelte";
     import { getOrg } from '$lib/stores/organizations';
+    import FilePreview from '$lib/components/FilePreview.svelte';
 
     let validateAccountConfirmation = $state(false);
     let showAlert = $state(false);
@@ -216,7 +217,7 @@ Já tens tudo pronto para aceitar reservas na plataforma!</p>
 <p>Caso necessites de apoio ou tenhas alguma dúvida, estamos inteiramente disponíveis
 para ajudar.</p>
 <p>Com os melhores cumprimentos,</p>
-<p><img width="50" height="50" src="https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/images%2Fapplogo.png?alt=media&token=882b99c8-8caa-42d4-a580-18f47671f677" />
+<p><img alt="logo" width="50" height="50" src="https://firebasestorage.googleapis.com/v0/b/app-gotuk.appspot.com/o/images%2Fapplogo.png?alt=media&token=882b99c8-8caa-42d4-a580-18f47671f677" />
 <br>
 <strong>Customer Care</strong><br>
 <span style="font-size: 10px">WhatsApp: +351917773031<br>
@@ -236,19 +237,27 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
         localPreviews.splice(index, 1)
     }
 
-    function selectFiles(event) {
-        selectedFiles.push(...Array.from(event.target.files))
-        localPreviews = selectedFiles.map(file => URL.createObjectURL(file))
-    }
-
     function removeVehicleInfoImage(index) {
         selectedVehicleInfoFiles.splice(index, 1)
         localVehicleInfoPreviews.splice(index, 1)
     }
 
+    function selectFiles(event) {
+        const files = Array.from(event.target.files);
+        selectedFiles.push(...files);
+        localPreviews = selectedFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
+    }
+
     function selectVehicleInfoFiles(event) {
-        selectedVehicleInfoFiles.push(...Array.from(event.target.files))
-        localVehicleInfoPreviews = selectedVehicleInfoFiles.map(file => URL.createObjectURL(file))
+        const files = Array.from(event.target.files);
+        selectedVehicleInfoFiles.push(...files);
+        localVehicleInfoPreviews = selectedVehicleInfoFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
     }
 
     function removePersonalInsuranceImage(index) {
@@ -257,8 +266,12 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
     }
 
     function selectPersonalInsuranceFiles(event) {
-        selectedPersonalInsuranceFiles.push(...Array.from(event.target.files))
-        localPersonalInsurancePreviews = selectedPersonalInsuranceFiles.map(file => URL.createObjectURL(file))
+        const files = Array.from(event.target.files);
+        selectedPersonalInsuranceFiles.push(...files);
+        localPersonalInsurancePreviews = selectedPersonalInsuranceFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            type: file.type
+        }));
     }
 
     async function approve(documentType) {
@@ -374,15 +387,7 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                 {#each vehicleInfoFiles as file}
                                     <div class="relative w-20 h-20 previewImage">
                                         <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                            {#if file.type.startsWith('image/')}
-                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
-                                            {:else if file.type === 'application/pdf'}
-                                                <FilePdfSolid class="w-10 h-10"/>
-                                            {:else if file.type.includes('word')}
-                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
-                                            {:else}
-                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
-                                            {/if}
+                                            <FilePreview {file} />
                                         </a>
                                     </div>
                                 {/each}
@@ -403,10 +408,10 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                 <input type="file" accept="image/*" bind:this={fileVehicleInfoInput} multiple onchange={selectVehicleInfoFiles} style="display: none" />
                                 {#if localVehicleInfoPreviews.length > 0}
                                     <div class="flex gap-2 mt-2">
-                                        {#each localVehicleInfoPreviews as preview, index}
+                                        {#each localVehicleInfoPreviews as file, index}
                                             <div class="relative w-20 h-20 previewImage">
                                                 <!-- Image Preview -->
-                                                <img src={preview} alt="Documentos" class="w-full h-full object-cover rounded-md" />
+                                                <FilePreview {file} />
                                                 <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeVehicleInfoImage(index)}} >
                                                     ✕
                                                 </button>
@@ -456,15 +461,7 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                 {#each insuranceInfoFiles as file}
                                     <div class="relative w-20 h-20 previewImage">
                                         <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                            {#if file.type.startsWith('image/')}
-                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
-                                            {:else if file.type === 'application/pdf'}
-                                                <FilePdfSolid class="w-10 h-10"/>
-                                            {:else if file.type.includes('word')}
-                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
-                                            {:else}
-                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
-                                            {/if}
+                                            <FilePreview {file} />
                                         </a>
                                     </div>
                                 {/each}
@@ -498,10 +495,10 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                 <input type="file" accept="image/*" bind:this={fileInput} multiple onchange={selectFiles} style="display: none" />
                                 {#if localPreviews.length > 0}
                                     <div class="flex gap-2 mt-2">
-                                        {#each localPreviews as preview, index}
+                                        {#each localPreviews as file, index}
                                             <div class="relative w-20 h-20 previewImage">
                                                 <!-- Image Preview -->
-                                                <img src={preview} alt="Documentos" class="w-full h-full object-cover rounded-md" />
+                                                <FilePreview {file} />
                                                 <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removeImage(index)}} >
                                                     ✕
                                                 </button>
@@ -554,15 +551,7 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                 {#each personalInsuranceFiles as file}
                                     <div class="relative w-20 h-20 mr-5">
                                         <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                            {#if file.type.startsWith('image/')}
-                                                <img src={file.url} alt="Document Thumbnail" class="w-full h-full object-cover rounded-md" />
-                                            {:else if file.type === 'application/pdf'}
-                                                <FilePdfSolid class="w-10 h-10"/>
-                                            {:else if file.type.includes('word')}
-                                                <img src="/icons/doc-icon.png" alt="Word Document" class="w-full h-full object-cover rounded-md" />
-                                            {:else}
-                                                <img src="/icons/file-icon.png" alt="Generic File" class="w-full h-full object-cover rounded-md" />
-                                            {/if}
+                                            <FilePreview {file} />
                                         </a>
                                     </div>
                                 {/each}
@@ -595,10 +584,9 @@ faça qualquer uso ou divulgação do seu conteúdo e proceda à eliminação pe
                                     <input type="file" accept="image/*" bind:this={filePersonalInsuranceInput} multiple onchange={selectPersonalInsuranceFiles} style="display: none" />
                                     {#if localPersonalInsurancePreviews.length > 0}
                                         <div class="flex gap-2 mt-2">
-                                            {#each localPersonalInsurancePreviews as preview, index}
+                                            {#each localPersonalInsurancePreviews as file, index}
                                                 <div class="relative w-20 h-20 previewImage">
-                                                    <!-- Image Preview -->
-                                                    <img alt="Document" class="w-full h-full object-cover rounded-md" src={preview} />
+                                                    <FilePreview {file} />
                                                     <button class="absolute top-0 right-0 bg-red-500 text-white text-xs p-1 rounded-full" onclick={(event) => {event.stopPropagation(); removePersonalInsuranceImage(index)}} >
                                                         ✕
                                                     </button>

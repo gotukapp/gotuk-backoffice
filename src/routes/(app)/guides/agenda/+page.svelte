@@ -232,7 +232,6 @@
         if (groupStart !== null) {
             groups.push({ start: toTimeStr(groupStart), end: toTimeStr(prev + 30) });
         }
-        console.log(slots, groups)
         return groups;
     }
 
